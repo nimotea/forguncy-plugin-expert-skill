@@ -1,0 +1,43 @@
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using GrapeCity.Forguncy.ServerApi;
+
+namespace MyPluginNamespace
+{
+    [Icon("pack://application:,,,/MyPluginNamespace;component/Resources/Icon.png")]
+    public class MyServerCommand : Command
+    {
+        [DisplayName("Sample Property")]
+        [FormulaProperty]
+        public object SampleProperty { get; set; }
+
+        public override async Task<ExecutionResult> Execute(IGenerateContext context)
+        {
+            try
+            {
+                // 1. Evaluate Formula
+                var value = await context.EvaluateFormulaAsync(SampleProperty);
+
+                // 2. Perform Logic
+                // TODO: Implement your business logic here.
+                // Example: string result = DoSomething(value);
+
+                // 3. Return Result
+                return new ExecutionResult
+                {
+                    ResultType = ExecutionResultType.Success,
+                    // Message = "Operation successful" 
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ExecutionResult
+                {
+                    ResultType = ExecutionResultType.Failure,
+                    Message = ex.Message
+                };
+            }
+        }
+    }
+}

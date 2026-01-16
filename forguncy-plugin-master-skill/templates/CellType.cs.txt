@@ -1,0 +1,19 @@
+using System;
+using System.ComponentModel;
+using GrapeCity.Forguncy.Plugin;
+using GrapeCity.Forguncy.CellTypes;
+
+namespace MyPluginNamespace
+{
+    [Icon("pack://application:,,,/MyPluginNamespace;component/Resources/Icon.png")]
+    public class MyCellType : CellType
+    {
+        [DisplayName("My Option")]
+        public string MyOption { get; set; }
+
+        public override string ToString()
+        {
+            return "My Custom Cell";
+        }
+    }
+}

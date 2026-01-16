@@ -1,0 +1,22 @@
+<!-- 
+  注意：
+  通常情况下，建议使用官方的“活字格插件构建器”来生成项目结构和 .csproj 文件。
+  本文件仅作为手动配置或参考使用。
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>MyPluginNamespace</AssemblyName>
+    <RootNamespace>MyPluginNamespace</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Replace with actual version or path -->
+    <PackageReference Include="GrapeCity.Forguncy.ServerApi" Version="X.X.X" />
+    <PackageReference Include="GrapeCity.Forguncy.CellTypes" Version="X.X.X" />
+  </ItemGroup>
+
+</Project>
