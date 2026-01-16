@@ -40,10 +40,23 @@ description: 协助开发者初始化、编写和规范化活字格插件代码�
 
 ### 2. 需求分析与模板选择
 - **如果用户请求添加功能**（且项目已初始化完成）：
-    - 理解用户的具体目标（例如，“计算 MD5”、“自定义按钮”、“使用 D3.js 绘图”）。
-    - 选择最合适的模板：
-        - 服务器端逻辑：使用 `templates/ServerCommand.cs.txt`。
-        - 前端 UI/交互：使用 `templates/CellType.cs.txt`。
+    - 理解用户的具体目标。
+    - **根据功能分类选择最合适的模板**：
+        1.  **单元格插件 (CellType)**：
+            - 用于：自定义前端 UI 控件、图表（如 D3.js）、复杂交互组件。
+            - 模板：`templates/CellType.cs.txt`
+        2.  **服务端命令插件 (ServerCommand)**：
+            - 用于：后端逻辑处理、数据库操作、文件读写。
+            - 模板：`templates/ServerCommand.cs.txt`
+        3.  **客户端命令插件 (ClientCommand)**：
+            - 用于：纯前端逻辑、页面跳转、浏览器 API 调用。
+            - 模板：`templates/ClientCommand.cs.txt`
+        4.  **服务端 API (ServerAPI)**：
+            - 用于：提供自定义 HTTP 接口供外部系统调用。
+            - 模板：`templates/ServerApi.cs.txt`
+        5.  **自定义中间件 (Middleware)**：
+            - 用于：拦截请求、全局异常处理、自定义认证逻辑。
+            - 模板：`templates/Middleware.cs.txt`
 
 ### 3. 逻辑实现
 - 将具体的业务逻辑填入选定的模板中。

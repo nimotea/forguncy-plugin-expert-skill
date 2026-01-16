@@ -1,0 +1,23 @@
+using System;
+using System.ComponentModel;
+using GrapeCity.Forguncy.Plugin;
+
+namespace MyPluginNamespace
+{
+    [Icon("pack://application:,,,/MyPluginNamespace;component/Resources/Icon.png")]
+    public class MyClientCommand : Command
+    {
+        [DisplayName("Alert Message")]
+        public string Message { get; set; }
+
+        public override string GetExecuteJavaScript()
+        {
+            // 返回在客户端执行的 JavaScript 代码
+            // 可以使用 Forguncy.Page 等客户端 API
+            return $@"
+                var msg = '{Message}';
+                alert(msg);
+            ";
+        }
+    }
+}
