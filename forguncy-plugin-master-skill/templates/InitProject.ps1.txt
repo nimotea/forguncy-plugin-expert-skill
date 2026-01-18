@@ -23,7 +23,8 @@ $PossiblePaths = @(
     "D:\Code\ForguncyPluginBuilder\forguncyPluginBuilder_V11.1\bin\ForguncyPluginCreator.exe",
     "C:\Program Files\Forguncy Plugin Builder\ForguncyPluginCreator.exe",
     "C:\Program Files (x86)\Forguncy Plugin Builder\ForguncyPluginCreator.exe",
-    "$env:LOCALAPPDATA\Forguncy Plugin Builder\ForguncyPluginCreator.exe"
+    "$env:LOCALAPPDATA\Forguncy Plugin Builder\ForguncyPluginCreator.exe",
+    "E:\forguncyPluginBuilder_V11.1\bin\ForguncyPluginCreator.exe"
 )
 
 $BuilderPath = $null
