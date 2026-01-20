@@ -252,4 +252,17 @@ def get_plugin_type_context(params: GetContextInput) -> str:
     return "\n".join(output)
 
 if __name__ == "__main__":
-    mcp.run()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Forguncy Plugin MCP Server")
+    parser.add_argument("--transport", default="stdio", choices=["stdio", "sse"], help="Transport protocol to use (stdio or sse)")
+    parser.add_argument("--port", type=int, default=8000, help="Port to listen on for SSE transport")
+    parser.add_argument("--host", default="0.0.0.0", help="Host to listen on for SSE transport")
+    
+    args = parser.parse_args()
+    
+    if args.transport == "sse":
+        print(f"Starting SSE server on {args.host}:{args.port}...")
+        mcp.run(transport="sse", port=args.port, host=args.host)
+    else:
+        mcp.run()
