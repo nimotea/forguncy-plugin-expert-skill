@@ -18,7 +18,28 @@ description: 协助开发者初始化、编写和规范化活字格插件代码�
 ## 知识库与标准流程
 - **核心索引**：`docs/DOC_INDEX.md` (所有开发任务的入口，AI 必须优先检索此文件)
 - **标准作业程序 (SOP)**：`docs/SOP.md` (定义了插件开发的五个标准阶段)
-- **最佳实践**：`docs/SDK_BestPractices.md`
+- **最佳实践**：`docs/SDK_BestPractices.md` (包含 IGenerateContext、DataAccess 和参数安全的关键规则)
+
+## 关键编码规范 (Critical Coding Standards)
+以下规则必须严格遵守，违反将导致插件不稳定或安全漏洞：
+
+1.  **IGenerateContext 使用**：
+    - 它是请求作用域 (Request-Scoped) 的，**严禁**缓存到静态变量中。
+    - 如果辅助方法需要访问环境，必须通过参数传递。
+
+2.  **数据访问 (Data Access)**：
+    - **必须**使用 `this.Context.DataAccess` (ServerCommand) 或 `this.DataAccess` (ServerAPI)。
+    - **严禁**使用 `new SqlConnection` 或其他 ADO.NET 连接对象，因为这会破坏活字格的事务链。
+    - **参数化查询**：严禁字符串拼接 SQL，必须使用参数化查询 (e.g., `ExecuteNonQuery("... @Val", new { Val = x })`)。
+
+3.  **日志与异常**：
+    - **严禁**使用 `Console.WriteLine`。
+    - **必须**使用 `this.Context.Logger` (或 `this.Logger`) 记录日志。
+    - 关键逻辑必须包裹在 `try-catch` 中。
+
+4.  **公式与变量 (Formulas & Variables)**：
+    - 凡是支持变量绑定的属性，**必须**标记 `[FormulaProperty]` 且类型设为 `object`。
+    - 运行时**必须**使用 `EvaluateFormulaAsync` 解析，**严禁**手动解析 `"{...}"` 字符串。
 
 ## 指令
 
