@@ -4,9 +4,14 @@ This MCP server provides access to the Forguncy Plugin Master Skill documentatio
 
 ## Capabilities
 
-- List and read documentation.
-- List and read code templates.
-- Access the main SKILL.md guide.
+- List and read documentation (from `references/` folder).
+- List and read code templates (from `assets/templates/` folder).
+- List available icons (from `assets/icons/` folder).
+- Access the main SKILL.md guide and SOP.md.
+- Get context-specific docs and templates for different plugin types.
+- **Project Validation**: Check plugin project structure and configuration.
+- **PowerShell Helper**: Convert commands to PowerShell compatible format.
+- **Script Execution**: Run maintenance scripts (packaging, reference updates).
 
 ## Usage
 

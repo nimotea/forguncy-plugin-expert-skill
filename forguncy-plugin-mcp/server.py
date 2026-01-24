@@ -2,22 +2,13 @@ from typing import List, Optional, Dict
 from pathlib import Path
 import os
 import re
+import subprocess
 from mcp.server.fastmcp import FastMCP
-from pydantic import BaseModel, Field
+from pydantic import Field
+from config import BASE_DIR, DOCS_DIR, TEMPLATES_DIR, SKILL_FILE, ICONS_DIR, SCRIPTS_DIR, ensure_base_dir, find_plugin_project
 
 # Initialize the MCP server
 mcp = FastMCP("forguncy_plugin_mcp")
-
-# Configuration
-# Assuming the skill directory is sibling to this mcp directory
-BASE_DIR = Path(__file__).parent.parent / "forguncy-plugin-master-skill"
-DOCS_DIR = BASE_DIR / "docs"
-TEMPLATES_DIR = BASE_DIR / "templates"
-SKILL_FILE = BASE_DIR / "SKILL.md"
-
-def _ensure_base_dir():
-    if not BASE_DIR.exists():
-        raise FileNotFoundError(f"Base directory not found at {BASE_DIR}")
 
 # Tool Input Models
 # Models removed in favor of direct parameters for better compatibility
@@ -34,24 +25,40 @@ def _ensure_base_dir():
 )
 def get_skill_overview() -> str:
     """Reads the main SKILL.md file."""
-    _ensure_base_dir()
+    ensure_base_dir()
     if not SKILL_FILE.exists():
         return "Error: SKILL.md not found."
     return SKILL_FILE.read_text(encoding="utf-8")
+
+@mcp.tool(
+    name="get_sop",
+    annotations={
+        "title": "Get SOP (Standard Operating Procedure)",
+        "readOnlyHint": True,
+        "description": "Reads the SOP.md file which contains the standard operating procedures for development."
+    }
+)
+def get_sop() -> str:
+    """Reads the SOP.md file."""
+    ensure_base_dir()
+    sop_file = DOCS_DIR / "SOP.md"
+    if not sop_file.exists():
+        return "Error: SOP.md not found."
+    return sop_file.read_text(encoding="utf-8")
 
 @mcp.tool(
     name="list_docs",
     annotations={
         "title": "List Documentation Files",
         "readOnlyHint": True,
-        "description": "Lists all available documentation files in the docs directory."
+        "description": "Lists all available documentation files in the references directory."
     }
 )
 def list_docs() -> str:
     """Lists all available documentation files."""
-    _ensure_base_dir()
+    ensure_base_dir()
     if not DOCS_DIR.exists():
-        return "Error: docs directory not found."
+        return "Error: references directory not found."
     
     files = []
     for root, _, filenames in os.walk(DOCS_DIR):
@@ -70,16 +77,16 @@ def list_docs() -> str:
         "description": "Reads the content of a specific documentation file."
     }
 )
-def read_doc(path: str = Field(..., description="Relative path to the document within docs/ folder (e.g. 'SOP.md' or 'references/CellType/Basic_Structure.md')")) -> str:
+def read_doc(path: str = Field(..., description="Relative path to the document within references/ folder (e.g. 'SOP.md' or 'CellType/Basic_Structure.md')")) -> str:
     """Reads the content of a specific documentation file."""
-    _ensure_base_dir()
+    ensure_base_dir()
     file_path = DOCS_DIR / path
     
     # Security check: ensure path is within DOCS_DIR
     try:
         file_path.resolve().relative_to(DOCS_DIR.resolve())
     except ValueError:
-        return "Error: Invalid file path. Must be within docs directory."
+        return "Error: Invalid file path. Must be within references directory."
         
     if not file_path.exists():
         return f"Error: File '{path}' not found."
@@ -96,7 +103,7 @@ def read_doc(path: str = Field(..., description="Relative path to the document w
 )
 def list_templates() -> str:
     """Lists all available code templates."""
-    _ensure_base_dir()
+    ensure_base_dir()
     if not TEMPLATES_DIR.exists():
         return "Error: templates directory not found."
     
@@ -113,7 +120,7 @@ def list_templates() -> str:
 )
 def read_template(filename: str = Field(..., description="Filename of the template (e.g. 'CellType.cs.txt')")) -> str:
     """Reads the content of a specific code template."""
-    _ensure_base_dir()
+    ensure_base_dir()
     file_path = TEMPLATES_DIR / filename
     
     # Security check: ensure path is within TEMPLATES_DIR
@@ -128,6 +135,23 @@ def read_template(filename: str = Field(..., description="Filename of the templa
     return file_path.read_text(encoding="utf-8")
 
 @mcp.tool(
+    name="list_icons",
+    annotations={
+        "title": "List Icons",
+        "readOnlyHint": True,
+        "description": "Lists all available plugin icons."
+    }
+)
+def list_icons() -> str:
+    """Lists all available plugin icons."""
+    ensure_base_dir()
+    if not ICONS_DIR.exists():
+        return "Error: icons directory not found."
+    
+    files = [f.name for f in ICONS_DIR.glob("*.svg") if f.is_file()]
+    return "\n".join(sorted(files))
+
+@mcp.tool(
     name="search_docs",
     annotations={
         "title": "Search Documentation",
@@ -137,7 +161,7 @@ def read_template(filename: str = Field(..., description="Filename of the templa
 )
 def search_docs(query: str = Field(..., description="Keywords to search in documentation (e.g. 'DataAccess', 'Formula', 'ListView')")) -> str:
     """Searches for keywords in documentation files."""
-    _ensure_base_dir()
+    ensure_base_dir()
     results = []
     query_lower = query.lower()
     
@@ -185,36 +209,36 @@ def get_plugin_type_context(plugin_type: str = Field(..., description="Type of p
     context_map = {
         "ServerCommand": {
             "template": "ServerCommand.cs.txt",
-            "docs_dir": "references/ServerCommand",
+            "docs_dir": "ServerCommand",
             "key_docs": [
-                "references/ServerCommand/Basic_Structure.md",
-                "references/ServerCommand/Process_Exception_Handling.md",
-                "references/ServerCommand/Other_Database_Interaction.md"
+                "ServerCommand/Basic_Structure.md",
+                "ServerCommand/Process_Exception_Handling.md",
+                "ServerCommand/Other_Database_Interaction.md"
             ]
         },
         "CellType": {
             "template": "CellType.cs.txt",
-            "docs_dir": "references/CellType",
+            "docs_dir": "CellType",
             "key_docs": [
-                "references/CellType/Basic_Structure.md",
-                "references/CellType/Integration_Lifecycle.md",
-                "references/CellType/Designer_Preview.md"
+                "CellType/Basic_Structure.md",
+                "CellType/Integration_Lifecycle.md",
+                "CellType/Designer_Preview.md"
             ]
         },
         "ClientCommand": {
             "template": "ClientCommand.cs.txt",
-            "docs_dir": "references/ClientCommand",
-            "key_docs": ["references/ClientCommand/README.md"]
+            "docs_dir": "ClientCommand",
+            "key_docs": ["ClientCommand/README.md"]
         },
         "ServerApi": {
             "template": "ServerApi.cs.txt",
-            "docs_dir": "references/ServerApi",
-            "key_docs": ["references/ServerApi/README.md"]
+            "docs_dir": "ServerApi",
+            "key_docs": ["ServerApi/README.md"]
         },
         "Middleware": {
             "template": "Middleware.cs.txt",
-            "docs_dir": "references/Middleware",
-            "key_docs": ["references/Middleware/README.md"]
+            "docs_dir": "Middleware",
+            "key_docs": ["Middleware/README.md"]
         }
     }
     
@@ -232,7 +256,7 @@ def get_plugin_type_context(plugin_type: str = Field(..., description="Type of p
         output.append(f"- {doc}")
         
     output.append(f"\n## All Related Documentation")
-    _ensure_base_dir()
+    ensure_base_dir()
     docs_path = DOCS_DIR / info['docs_dir']
     if docs_path.exists():
         for f in docs_path.glob("*.md"):
@@ -240,6 +264,109 @@ def get_plugin_type_context(plugin_type: str = Field(..., description="Type of p
             output.append(f"- {rel}")
             
     return "\n".join(output)
+
+@mcp.tool(
+    name="get_powershell_command",
+    annotations={
+        "title": "Get PowerShell Compatible Command",
+        "description": "Converts a standard shell command (using &&) to a PowerShell compatible command (using ; or script block)."
+    }
+)
+def get_powershell_command(command: str = Field(..., description="The command to convert (e.g. 'cd dir && npm install')")) -> str:
+    """Converts a command to PowerShell compatible format."""
+    # Replace && with ;
+    ps_command = command.replace(" && ", "; ")
+    return f"In PowerShell, use ';' instead of '&&':\n\n{ps_command}"
+
+@mcp.tool(
+    name="validate_plugin_project",
+    annotations={
+        "title": "Validate Forguncy Plugin Project",
+        "description": "Checks the current directory for Forguncy plugin project structure and common configuration issues."
+    }
+)
+def validate_plugin_project(project_path: Optional[str] = Field(None, description="Path to the project directory. If not provided, searches upwards from current directory.")) -> str:
+    """Validates the Forguncy plugin project structure."""
+    cwd = Path(project_path) if project_path else Path.cwd()
+    project_dir = find_plugin_project(cwd)
+    
+    if not project_dir:
+        return "Error: No Forguncy plugin project (.csproj) found in the specified directory or its parents."
+    
+    results = [f"# Validation Results for {project_dir.name}"]
+    issues = []
+    
+    # 1. Check for .csproj
+    csproj_files = list(project_dir.glob("*.csproj"))
+    if not csproj_files:
+        issues.append("- Missing .csproj file.")
+    else:
+        csproj = csproj_files[0]
+        content = csproj.read_text(encoding="utf-8")
+        
+        # Check for AssemblyName and RootNamespace
+        if "<AssemblyName>" not in content:
+            issues.append("- <AssemblyName> is missing in .csproj. This might cause issues with Forguncy registration.")
+        if "<RootNamespace>" not in content:
+            issues.append("- <RootNamespace> is missing in .csproj.")
+            
+        # Check for Forguncy references
+        if "GrapeCity.Forguncy" not in content and "Forguncy." not in content:
+            issues.append("- No Forguncy SDK references found in .csproj.")
+
+    # 2. Check for PluginConfig.json (optional but recommended for some types)
+    config_json = project_dir / "PluginConfig.json"
+    if config_json.exists():
+        results.append("- Found PluginConfig.json")
+    
+    # 3. Check for Resources or Icons
+    icon_files = list(project_dir.glob("**/icon.png")) + list(project_dir.glob("**/*.svg"))
+    if not icon_files:
+        issues.append("- No icon file (icon.png or .svg) found. Plugins should have an icon.")
+
+    if not issues:
+        results.append("\n✅ Project structure looks valid!")
+    else:
+        results.append("\n❌ Found the following issues:")
+        results.extend(issues)
+        
+    return "\n".join(results)
+
+@mcp.tool(
+    name="run_skill_script",
+    annotations={
+        "title": "Run Skill Script",
+        "description": "Executes one of the pre-defined maintenance scripts (e.g. update_references.ps1, package_skill.ps1)."
+    }
+)
+def run_skill_script(script_name: str = Field(..., description="Name of the script to run (e.g. 'update_references.ps1')"), args: List[str] = []) -> str:
+    """Runs a script from the scripts directory."""
+    ensure_base_dir()
+    script_path = SCRIPTS_DIR / script_name
+    
+    if not script_path.exists():
+        available = [f.name for f in SCRIPTS_DIR.glob("*")]
+        return f"Error: Script '{script_name}' not found. Available scripts: {', '.join(available)}"
+    
+    try:
+        if script_name.endswith(".ps1"):
+            cmd = ["powershell", "-ExecutionPolicy", "Bypass", "-File", str(script_path)] + args
+        elif script_name.endswith(".py"):
+            cmd = ["python", str(script_path)] + args
+        else:
+            return f"Error: Unsupported script type '{script_name}'."
+            
+        result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", check=False)
+        
+        output = [f"# Script Execution: {script_name}"]
+        output.append(f"\n## STDOUT\n{result.stdout}")
+        if result.stderr:
+            output.append(f"\n## STDERR\n{result.stderr}")
+        output.append(f"\nExit Code: {result.returncode}")
+        
+        return "\n".join(output)
+    except Exception as e:
+        return f"Error executing script: {str(e)}"
 
 if __name__ == "__main__":
     import argparse
