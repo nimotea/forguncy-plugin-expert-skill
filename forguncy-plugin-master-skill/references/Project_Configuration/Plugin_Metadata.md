@@ -8,15 +8,16 @@
 
 ### 关键属性说明
 
-| 属性 | 说明 | 示例 |
-| :--- | :--- | :--- |
-| **Description** | 插件的详细描述，显示在插件管理界面。 | `这是一个用于集成第三方支付的高级插件。` |
-| **Authors** | 插件作者或公司名称。 | `MyCompany` |
-| **Version** | 插件版本号，遵循 SemVer 规范。 | `1.0.0` |
-| **Product** | 产品名称（通常与插件名一致或为所属产品线）。 | `Advanced Payment Plugin` |
-| **Copyright** | 版权信息。 | `Copyright © 2024 MyCompany` |
-| **PackageIcon** | 插件包图标（在插件列表中显示）。 | `Icon.png` |
-| **PackageTags** | 标签，有助于搜索（空格分隔）。 | `Forguncy Payment Integration` |
+| 属性            | 说明                                         | 示例                                     |
+| :-------------- | :------------------------------------------- | :--------------------------------------- |
+| **Description** | 插件的详细描述，显示在插件管理界面。         | `这是一个用于集成第三方支付的高级插件。` |
+| **Authors**     | 插件作者。                                   | `活字格插件大师`                         |
+| **Company**     | 公司名称。                                   | `活字格开发实验室`                       |
+| **Version**     | 插件版本号，遵循 SemVer 规范。               | `1.0.0`                                  |
+| **Product**     | 产品名称（通常与插件名一致或为所属产品线）。 | `Advanced Payment Plugin`                |
+| **Copyright**   | 版权信息。                                   | `Copyright © 2024 MyCompany`             |
+| **PackageIcon** | 插件包图标（在插件列表中显示）。             | `Icon.png`                               |
+| **PackageTags** | 标签，有助于搜索（空格分隔）。               | `Forguncy Payment Integration`           |
 
 ### 示例代码
 
@@ -27,6 +28,8 @@
   <Description>这是一个功能强大的活字格插件，提供了...功能。</Description>
   <!-- 作者 -->
   <Authors>活字格插件大师</Authors>
+  <!-- 公司 -->
+  <Company>活字格开发实验室</Company>
   <!-- 版本号 -->
   <Version>1.0.0</Version>
   <!-- 产品名 -->

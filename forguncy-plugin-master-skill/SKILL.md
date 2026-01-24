@@ -41,6 +41,11 @@ description: 协助开发者初始化、编写和规范化活字格插件代码�
     - 凡是支持变量绑定的属性，**必须**标记 `[FormulaProperty]` 且类型设为 `object`。
     - 运行时**必须**使用 `EvaluateFormulaAsync` 解析，**严禁**手动解析 `"{...}"` 字符串。
 
+5.  **环境依赖与构建修复 (Critical Protocol)**：
+    - **触发条件**：当遇到 `dotnet build` 失败、Assembly 引用丢失 (如 `GrapeCity.Forguncy.ServerApi` 找不到)、或路径错误 (如 `ForguncyPluginPackageTool` 不存在) 时。
+    - **禁止行为**：**绝对禁止** AI 尝试使用 `ls`, `dir`, `Get-ChildItem` 等命令扫描用户硬盘 (如 `E:\`, `C:\Program Files`) 来寻找安装路径。**绝对禁止** 猜测路径。
+    - **必须行为 (STOP & ASK)**：必须立即**停止**所有后续操作，直接向用户提问：“检测到活字格设计器路径缺失或不匹配。请提供您当前电脑上活字格设计器的安装路径（例如 `C:\Program Files\Forguncy\ForguncyDesigner`）。”
+
 ## 指令
 
 请严格遵循 `references/SOP.md` 定义的流程以及以下步骤来处理用户的请求：
@@ -128,6 +133,24 @@ description: 协助开发者初始化、编写和规范化活字格插件代码�
     - **日志规范**：**禁止**使用 `Console.WriteLine`，必须使用活字格内置 Logger 或抛出异常。
     - **错误处理**：关键逻辑必须包裹在 `try-catch` 中，并返回友好的错误信息。
     - **中文规范**：插件展示侧（如 `[DisplayName]`, `[Description]`, `[Category]` 等属性值）**必须使用中文**，严禁使用纯英文作为插件名称或描述，以符合国内用户使用习惯。
+
+### 6. 环境迁移与修复 (Environment Migration & Build Fixes)
+- **核心原则**：严格遵守 **Critical Coding Standards #5**。当且仅当用户明确提供路径时，才执行路径更新。**严禁** AI 自行猜测或在未询问用户的情况下尝试“修复”路径。
+- **触发场景**：
+    - 用户反馈“更换了电脑”、“升级了活字格版本”。
+    - 执行 `dotnet build` 或打包命令时报错，提示找不到 `ForguncyPluginPackageTool` 或 DLL 引用丢失。
+    - 调试启动失败，提示找不到 `ForguncyDesigner.exe`。
+- **执行流程 (Standard Protocol)**：
+    1.  **暂停并询问 (STOP & ASK)**：
+        - 一旦检测到上述错误，**立即停止**当前任务。不要尝试搜索硬盘。
+        - **必须**回复：“检测到活字格设计器路径可能不匹配（通常发生在环境迁移或版本升级后）。为了准确修复，请告诉我您当前电脑上活字格设计器的安装路径（例如 `C:\Program Files\Forguncy\ForguncyDesigner`）。”
+    2.  **等待反馈**：
+        - **严禁**在同一条回复中给出修复脚本或尝试运行命令。必须等待用户输入路径。
+    3.  **执行修复**：
+        - 获得路径后，调用 `scripts/update_references.ps1`。
+        - 参数：`TargetForguncyPath` = 用户提供的路径。
+    4.  **验证**：
+        - 修复完成后，建议用户重新执行之前的构建或调试命令。
 
 ## 示例
 

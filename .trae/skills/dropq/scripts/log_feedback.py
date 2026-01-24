@@ -6,23 +6,46 @@ import sys
 
 def main():
     parser = argparse.ArgumentParser(description='Log feedback to a JSONL file.')
-    # Changed nargs to '+' to handle cases where shell splits the JSON string by spaces
-    parser.add_argument('data', nargs='+', help='JSON string or path to a JSON file')
+    # Changed nargs to '*' to handle cases where shell splits the JSON string by spaces, or no args (stdin)
+    parser.add_argument('data', nargs='*', help='JSON string, path to a JSON file, or empty for stdin')
     # parser.add_argument('--log-file', default='feedback_logs.jsonl', help='Name of the log file (default: feedback_logs.jsonl)')
     parser.add_argument('--project-root', help='Absolute path to the project root directory where logs should be saved')
+    parser.add_argument('--delete', action='store_true', help='Delete the input file after successful logging (only if input is a file)')
     
     args = parser.parse_args()
     
     log_filename = 'feedback_logs.jsonl'
+    input_is_file = False
+    input_file_path = None
     
     json_str = ""
     
+    # Strategy 0: Check Stdin if no args
+    if not args.data:
+        if not sys.stdin.isatty():
+            try:
+                # Force stdin to use utf-8 in Windows
+                if sys.platform == 'win32':
+                    sys.stdin.reconfigure(encoding='utf-8')
+                json_str = sys.stdin.read()
+                
+                # Handle BOM if present (PowerShell might add it)
+                if json_str.startswith('\ufeff'):
+                    json_str = json_str[1:]
+            except Exception as e:
+                print(f"Error reading from stdin: {e}")
+                sys.exit(1)
+        else:
+            parser.print_help()
+            sys.exit(1)
     # Strategy 1: Check if the first argument is a valid file path
     # (Only if only one argument is provided, to avoid ambiguity)
-    if len(args.data) == 1 and os.path.isfile(args.data[0]):
-        print(f"Reading input from file: {args.data[0]}")
+    elif len(args.data) == 1 and os.path.isfile(args.data[0]):
+        input_is_file = True
+        input_file_path = args.data[0]
+        print(f"Reading input from file: {input_file_path}")
         try:
-            with open(args.data[0], 'r', encoding='utf-8') as f:
+            with open(input_file_path, 'r', encoding='utf-8') as f:
                 json_str = f.read()
                 if not json_str.strip():
                     print("Error: Input file is empty.")
@@ -71,6 +94,15 @@ def main():
         with open(log_file_path, 'a', encoding='utf-8') as f:
             f.write(json.dumps(data, ensure_ascii=False) + '\n')
         print(f"Successfully logged feedback to {log_file_path}")
+        
+        # Auto-delete input file if requested
+        if input_is_file and args.delete and input_file_path:
+            try:
+                os.remove(input_file_path)
+                print(f"Deleted input file: {input_file_path}")
+            except Exception as e:
+                print(f"Warning: Failed to delete input file: {e}")
+                
     except Exception as e:
         print(f"Error writing to log file: {e}")
         sys.exit(1)

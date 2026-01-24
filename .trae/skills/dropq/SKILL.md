@@ -84,21 +84,33 @@ When the user provides feedback, extract the following fields into a JSON object
 
 Execute the logging script with the JSON string and the project root.
 
-**Recommendation for Complex Content:**
-For complex JSON content (containing spaces, newlines, or quotes) or Windows environments, **it is strongly recommended to write the JSON to a temporary file first**, and then pass the file path to the script.
+**Option A: In-Memory via PowerShell Here-String (Recommended)**
+This is the most secure and reliable method. It avoids creating any temporary files and handles complex content (quotes, newlines) and Unicode characters correctly.
 
-**Option A: Passing JSON directly (Simple cases)**
+**IMPORTANT:** You MUST set `$OutputEncoding` to UTF-8 before piping to Python to prevent character corruption (mojibake).
+
+```powershell
+$OutputEncoding = [System.Text.Encoding]::UTF8
+$json = @'
+<JSON_CONTENT>
+'@
+$json | python skills/dropQ/scripts/log_feedback.py --project-root <absolute_project_root>
+```
+
+**Option B: Using a temporary file with Auto-Delete (Alternative)**
+Use this if the In-Memory method is not feasible.
+1. Write the JSON content to a temporary file (e.g., `temp_feedback.json`) in the project root.
+2. Run the script with the file path and `--delete` flag:
+```bash
+python skills/dropQ/scripts/log_feedback.py <absolute_path_to_temp_file> --project-root <absolute_project_root> --delete
+```
+(The script will automatically delete the file after reading).
+
+**Option C: Passing JSON directly (Simple cases only)**
+Only use this for very simple, single-line JSON without special characters.
 ```bash
 python skills/dropQ/scripts/log_feedback.py '{"title": "Simple Test"}' --project-root <absolute_project_root>
 ```
-
-**Option B: Using a temporary file (Recommended for stability)**
-1. Write the JSON content to a temporary file (e.g., `temp_feedback.json`) in the project root.
-2. Run the script with the file path:
-```bash
-python skills/dropQ/scripts/log_feedback.py <absolute_path_to_temp_file> --project-root <absolute_project_root>
-```
-3. Delete the temporary file.
 
 ### 3. Confirmation
 
