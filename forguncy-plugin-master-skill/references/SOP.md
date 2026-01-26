@@ -95,9 +95,21 @@
     *   **详细指南**：参见 `references/Project_Configuration/Plugin_Metadata.md`。
     *   **操作**：直接修改 `.csproj` 文件中的 `<PropertyGroup>` 节点，设置 `<Description>`, `<Authors>`, `<Version>`, `<PackageIcon>` 等属性。
 
-2.  **文档编写**：
+2.  **代码维护与重构 (维护场景)**：
+    *   **目标**：针对现有代码进行 API 升级、迁移或逻辑优化。
+    *   **步骤**：
+        1.  **定位引用**：使用 `grep` 或 `Find in Files` 全局搜索旧 API 或关键类名（如 `IGenerateContext`）。
+        2.  **小步修改**：每次只修改一个文件或一个方法，避免大规模破坏。
+        3.  **验证**：修改后立即编译 (`dotnet build`) 并运行单元测试（如有）或手动测试。
+        4.  **提交**：确保功能正常后立即 Git 提交，保持提交粒度细致。
+    *   **示例 (API 迁移)**：
+        *   查找：`grep -r "IGenerateContext" .`
+        *   替换：将 `IGenerateContext` 替换为 `IServerCommandExecuteContext`，并同步修改方法签名为 `ExecuteAsync`。
+        *   验证：编译通过，功能正常。
+
+3.  **文档编写**：
     *   编写插件使用说明书，解释各属性的作用和使用示例。
 
-3.  **版本管理**：
+4.  **版本管理**：
     *   每次更新前修改 `.csproj` 中的 `<Version>` 标签。
     *   遵循语义化版本规范 (X.Y.Z)。
