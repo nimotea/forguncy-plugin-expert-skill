@@ -137,7 +137,34 @@ onPageLoaded() {
 }
 ```
 
-## 5. 属性默认值规范 (C#)
+### 5. 生命周期异步限制 (JS)
+
+在编写 JavaScript 插件（如单元格类型、自定义命令）时，必须严格遵守活字格的生命周期同步性要求。
+
+- **严禁使用 async**：`createContent`、`onRender`、`destroy` 等生命周期方法**绝对禁止**声明为 `async`。
+- **后果**：活字格框架不等待这些方法返回的 `Promise`。如果你将 `createContent` 设为异步，它会立即返回一个 Promise 而不是 DOM 元素，导致单元格显示为空白，且控制台通常不会报错（静默失败）。
+- **正确处理异步逻辑**：
+    - 如果需要获取公式值（`evaluateFormulaAsync`），应在同步方法中发起请求，并在 `.then()` 回调中更新 DOM。
+    - 结合“尺寸检测轮询模式”或“状态标记”来处理数据到达后的重绘。
+
+```javascript
+// 错误示范：会导致显示空白
+async createContent() {
+    const val = await this.evaluateFormulaAsync(...); 
+    return $("<div>" + val + "</div>"); // 框架无法处理这个返回
+}
+
+// 正确示范：同步返回占位符，异步更新
+createContent() {
+    const container = $("<div>Loading...</div>");
+    this.evaluateFormulaAsync(...).then(val => {
+        container.text(val); // 数据到达后更新内容
+    });
+    return container; // 必须同步返回 DOM
+}
+```
+
+## 6. 属性默认值规范 (C#)
 
 在定义插件属性时，如果初始值不是该类型的默认值（如 `bool` 默认为 `false`，引用类型默认为 `null`），必须显式处理。
 

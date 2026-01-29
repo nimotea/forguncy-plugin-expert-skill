@@ -2,6 +2,10 @@
 /// <reference path="../Declarations/forguncy.Plugin.d.ts" />
 
 class MyPluginCellType extends Forguncy.Plugin.CellTypeBase {
+    /**
+     * 创建单元格内容
+     * 重要：严禁使用 async 关键字，必须同步返回 DOM 元素，否则会导致单元格显示为空白
+     */
     createContent() {
         const cellType = this.CellElement.CellType;
         console.log("[MyPlugin]: createContent started.", cellType);

@@ -58,6 +58,7 @@ namespace MyPlugin
 
 class MyPluginCellType extends Forguncy.Plugin.CellTypeBase {
     createContent() {
+        // 重要：严禁在此方法上使用 async 关键字，必须同步返回 DOM 元素
         // 1. 获取单元格模型数据（C#中定义的属性值）
         const cellType = this.CellElement.CellType;
         const propValue = cellType.MyProperty;
