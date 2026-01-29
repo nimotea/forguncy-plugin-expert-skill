@@ -105,7 +105,39 @@ onRender(container, renderInfo) {
 }
 ```
 
-## 6. 属性默认值规范 (Property Default Values)
+### 4. DOM 尺寸获取的最佳实践 (waitForSize)
+
+在 `createContent` 或 `onPageLoaded` 阶段，如果你使用的第三方库（如 ECharts, G2, Spreadsheet）需要容器的宽高进行初始化，请注意：**活字格的 DOM 挂载是异步的**。
+
+- **风险**：直接调用 `container.width()` 可能返回 `0`，导致初始化失败或渲染异常。
+- **解决方案**：使用“尺寸检测轮询模式”，直到容器真正具有尺寸后再执行逻辑。
+
+```javascript
+// 推荐的辅助函数模式
+waitForSize(container, callback) {
+    const checkSize = () => {
+        const width = container.width();
+        const height = container.height();
+        if (width > 0 && height > 0) {
+            callback(width, height);
+        } else {
+            // 每 50ms 检查一次，最多等待一段时间
+            requestAnimationFrame(checkSize);
+        }
+    };
+    checkSize();
+}
+
+// 使用示例
+onPageLoaded() {
+    this.waitForSize(this.container, (w, h) => {
+        console.log(`[MyPlugin]: Container ready (${w}x${h}), initializing chart...`);
+        this.initChart(w, h);
+    });
+}
+```
+
+## 5. 属性默认值规范 (C#)
 
 在定义插件属性时，如果初始值不是该类型的默认值（如 `bool` 默认为 `false`，引用类型默认为 `null`），必须显式处理。
 
