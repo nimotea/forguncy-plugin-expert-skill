@@ -11,6 +11,7 @@ namespace MyPluginNamespace
     {
         [DisplayName("示例属性")]
         [FormulaProperty]
+        [Description("属性的详细说明。如果该属性接收 JSON 数据，建议在此处提供示例结构，例如：\r\n[{\"depth\": 100, \"val\": 1}]")]
         public object SampleProperty { get; set; }
 
         [DisplayName("启用调试模式")]

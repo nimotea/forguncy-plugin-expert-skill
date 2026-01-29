@@ -9,6 +9,7 @@ namespace MyPluginNamespace
     public class MyCellType : CellType
     {
         [DisplayName("我的选项")]
+        [Description("这里是属性的详细说明。如果该属性接收 JSON 数据，建议在此处提供示例结构，例如：\r\n[{\"id\": 1, \"name\": \"test\"}]")]
         public string MyOption { get; set; }
 
         public override string ToString()

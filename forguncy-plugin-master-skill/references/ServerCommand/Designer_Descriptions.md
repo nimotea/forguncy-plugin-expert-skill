@@ -59,3 +59,12 @@ public class MyPluginCommand : Command
 1. **简洁明了**：描述应直击要点，避免过于冗长。
 2. **多行格式**：对于复杂的参数说明，使用 `\r\n` 进行分行，提高可读性。
 3. **特殊策略**：如果属性有默认行为或特殊限制（如“为空时表示无限”），务必在描述中说明。
+4. **数据结构示例**：对于接收 JSON 或复杂对象的属性，**必须**在 `[Description]` 中包含示例数据结构。这能极大降低用户的理解成本。
+
+### 复杂对象示例
+```csharp
+[DisplayName("数据序列")]
+[FormulaProperty]
+[Description("请输入包含数值的 JSON 数组，例如：\r\n[{\"depth\": 100, \"val\": 1}, {\"depth\": 200, \"val\": 2.5}]")]
+public object DataSeries { get; set; }
+```
