@@ -295,3 +295,42 @@ createContent() {
     // ... 初始化组件
 }
 ```
+
+## 9. 默认开启的布尔属性 (Boolean Default True Pattern)
+
+在活字格插件开发中，如果你需要一个**默认开启**（Default True）且支持用户取消勾选的布尔属性，直接使用标准的 `[DefaultValue(true)]` 可能会导致 JS 端逻辑处理困难。
+
+-   **场景**：你需要一个显示边框的属性，默认勾选（True）。
+-   **标准做法的问题**：
+    -   如果设 `[DefaultValue(true)]` 且初始值为 `true`，设计器保存时会省略该字段（因为值等于默认值）。
+    -   JS 端读取到的值为 `undefined`。
+    -   JS 代码必须显式处理 `undefined` 为 `true`（例如 `const show = (val === undefined) ? true : val`）。
+    -   如果 JS 开发者习惯使用简单的 Falsy 判断（`if (options.showBorder)`），则会因为 `undefined` 被视为 false 而导致默认关闭，逻辑出错。
+
+-   **推荐模式（Hack 方案）**：
+    利用 Forguncy 的序列化机制反向操作，确保开启状态始终被序列化，而关闭状态作为默认值（空）。
+
+    **C# 端定义：**
+    ```csharp
+    // 1. 标记 DefaultValue 为 false (欺骗序列化器)
+    [DefaultValue(false)]
+    [DisplayName("显示边框")]
+    // 2. 实际属性初始值设为 true (业务需求默认开启)
+    public bool ShowBorder { get; set; } = true;
+    ```
+
+    **机制解析：**
+    -   **默认状态 (True)**：`true != DefaultValue(false)` -> 属性被序列化写入 JSON (`ShowBorder: true`)。JS 读到 `true`。
+    -   **用户取消勾选 (False)**：`false == DefaultValue(false)` -> 属性被省略。JS 读到 `undefined`。
+
+    **JS 端实现：**
+    ```javascript
+    // 此时 JS 逻辑可以非常简单，视 undefined 为 false 即可
+    const showBorder = this.CellElement.CellType.ShowBorder || false;
+    
+    if (showBorder) {
+        // ... 渲染边框
+    }
+    ```
+
+    > **注意**：这种写法可能会引发代码分析器的默认值不一致警告，请忽略该警告，这是为了业务逻辑闭环而做的必要 Hack。

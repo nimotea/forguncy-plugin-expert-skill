@@ -65,3 +65,27 @@ public class MyPluginServerCommand : Command, ICommandExecutableInServerSideAsyn
     }
 }
 ```
+
+## 4. 进阶技巧：默认开启且支持取消的模式 (Default True Hack)
+
+如果你开发的是前端插件（如 CellType），且希望 JS 端逻辑更简洁（避免处理 `undefined`），可以使用“反向序列化技巧。
+
+### 场景
+你希望属性默认开启（True），但为了让 JS 端代码能简单地使用 `if (options.prop)` 判断（将 `undefined` 视为 false），你需要让 `true` 值被显式序列化，而 `false` 值被省略。
+
+### 实现方式
+- C# 初始值设为 `true`（业务默认值）。
+- `[DefaultValue]` 设为 `false`（欺骗序列化器，使其认为 true 是非默认值，从而强制序列化）。
+
+```csharp
+public class MyPluginCellType : CellTypeBase
+{
+    [DisplayName("显示标题")]
+    [DefaultValue(false)] // 关键点：欺骗序列化器
+    public bool ShowTitle { get; set; } = true; // 实际默认值
+}
+```
+
+### JS 端效果
+- **默认情况**：`ShowTitle` 为 `true`，序列化为 `{"ShowTitle": true}`。JS 读到 `true`。
+- **用户取消勾选**：`ShowTitle` 为 `false`，等于 `DefaultValue`，不序列化。JS 读到 `undefined` (Falsy)。
