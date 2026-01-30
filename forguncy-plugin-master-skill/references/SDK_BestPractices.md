@@ -240,3 +240,58 @@ public bool EnableCache { get; set; } = true; // 缺少 DefaultValueAttribute，
 ## 7. 其他建议
 - **异常处理**：不要吞掉异常。让错误适当地向上冒泡，以便活字格可以记录它们。
 - **日志记录**：利用活字格的日志记录机制（如果 SDK 暴露了的话）来记录调试信息。
+
+## 8. C# 与 JS 配置同步 (Configuration Sync)
+
+在开发复杂的可视化或 UI 插件时，经常需要将大量 C# 属性（如颜色、字体、边框等）映射到 JS 第三方库的配置对象中。
+
+- **痛点**：C# 属性名（PascalCase）与 JS 库配置项（camelCase 或 snake_case）通常不一致，导致 JS 代码中充斥着大量的 `if/else` 或三元运算符赋值逻辑，繁琐且易错。
+- **最佳实践**：编写一个通用的 `applySettings` 辅助函数，通过映射表批量处理配置同步。
+
+### 推荐模式
+
+**JS 端辅助函数：**
+
+```javascript
+/**
+ * 批量应用配置
+ * @param {Object} target - 目标对象 (如 options)
+ * @param {Object} source - 源数据 (this.CellElement.CellType)
+ * @param {Object} mapping - 映射表 { "JS配置名": "CSharp属性名" }
+ */
+applySettings(target, source, mapping) {
+    for (const [jsKey, csKey] of Object.entries(mapping)) {
+        const value = source[csKey];
+        if (value !== undefined && value !== null) {
+            target[jsKey] = value;
+        }
+    }
+}
+```
+
+**使用示例：**
+
+```javascript
+createContent() {
+    const cellType = this.CellElement.CellType;
+    
+    // 第三方库的默认配置
+    const chartOptions = {
+        title: "Default",
+        showLegend: true,
+        themeColor: "#000"
+    };
+
+    // 定义映射关系：左边是 JS 库需要的 key，右边是 C# 定义的属性名
+    const propertyMapping = {
+        "title": "TitleText",
+        "showLegend": "ShowLegend",
+        "themeColor": "ThemeColor"
+    };
+    
+    // 一键同步，自动忽略 C# 端未定义的属性
+    this.applySettings(chartOptions, cellType, propertyMapping);
+    
+    // ... 初始化组件
+}
+```

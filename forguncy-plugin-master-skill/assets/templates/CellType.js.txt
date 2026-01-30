@@ -22,6 +22,16 @@ class MyPluginCellType extends Forguncy.Plugin.CellTypeBase {
         // 示例：使用 Enum 对象进行分支判断
         // if (cellType.Type === MyEnumType.OptionA) { ... }
 
+        // 示例：使用 applySettings 批量同步配置
+        // const options = {
+        //     title: "Default Title",
+        //     color: "#000000"
+        // };
+        // this.applySettings(options, cellType, {
+        //     "title": "HeaderTitle",  // JS属性: C#属性
+        //     "color": "ForeColor"
+        // });
+
         console.log("[MyPlugin]: createContent complete.");
         return container;
     }
@@ -53,6 +63,23 @@ class MyPluginCellType extends Forguncy.Plugin.CellTypeBase {
             }
         };
         checkSize();
+    }
+
+    /**
+     * 辅助函数：批量应用配置到目标对象
+     * 用于解决 C# 属性与 JS 库配置项命名不一致的问题，减少手动 if/else 赋值
+     * @param {Object} target - 目标配置对象 (如第三方库的 options)
+     * @param {Object} source - 源配置对象 (通常是 this.CellElement.CellType)
+     * @param {Object} mapping - 属性映射表 { "JS配置项名": "CSharp属性名" }
+     */
+    applySettings(target, source, mapping) {
+        for (const [jsKey, csKey] of Object.entries(mapping)) {
+            const value = source[csKey];
+            // 只有当 C# 属性值不为 null/undefined 时才覆盖
+            if (value !== undefined && value !== null) {
+                target[jsKey] = value;
+            }
+        }
     }
 
     destroy() {
