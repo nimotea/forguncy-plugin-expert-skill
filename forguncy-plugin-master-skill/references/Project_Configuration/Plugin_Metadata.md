@@ -112,7 +112,44 @@ public class MyCommand : Command
 </ItemGroup>
 ```
 
-## 4. 常见问题
+## 4. 资源加载配置 (PluginConfig.json)
+
+对于大型前端插件，合理组织 JS 文件及其加载顺序至关重要。
+
+### 4.1 javascript 数组
+
+`PluginConfig.json` 中的 `javascript` 数组定义了插件加载时引入的脚本文件。
+
+**关键原则**：
+-   **顺序敏感**：浏览器将按数组定义的顺序依次加载并执行脚本。
+-   **依赖优先**：底层库、常量定义、工具类应排在业务逻辑（如继承 `CellTypeBase` 的类）之前。
+
+**多文件加载示例**:
+```json
+{
+  "javascript": [
+    "Scripts/lib/thirdparty-lib.js",  // 1. 第三方库
+    "Scripts/Common/Constants.js",    // 2. 常量定义 (MyPlugin.Constants)
+    "Scripts/Common/Utils.js",        // 3. 工具类 (MyPlugin.Utils)
+    "Scripts/CellTypes/Main.js"       // 4. 业务逻辑类 (继承基类)
+  ]
+}
+```
+
+### 4.2 css 数组
+
+同理，`css` 数组用于管理插件的样式表。
+
+```json
+{
+  "css": [
+    "Resources/BaseStyle.css",
+    "Resources/Theme.css"
+  ]
+}
+```
+
+## 5. 常见问题
 
 ### Q: 修改了 Description 但设计器中没更新？
 A: 尝试重新构建项目，并确保在活字格设计器中卸载旧版插件后重新安装新编译的插件包（或 Zip/Dll）。

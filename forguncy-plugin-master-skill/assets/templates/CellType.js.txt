@@ -12,7 +12,27 @@ class MyPluginCellType extends Forguncy.Plugin.CellTypeBase {
         super();
         // 最佳实践：在构造函数中初始化实例变量，用于存储状态或数据缓存
         this._data = null; 
+        this._lastDataJson = null; // 用于交互幂等性检查的数据快照
         this._container = null;
+    }
+
+    /**
+     * [RunTimeMethod] 单元格操作示例
+     * 最佳实践：交互幂等性 (Idempotency)
+     * 在执行昂贵操作前进行值对比。
+     */
+    resetAndReload(newData) {
+        const currentDataJson = JSON.stringify(newData);
+        if (this._lastDataJson === currentDataJson) {
+            console.log("[MyPlugin]: Data unchanged, skipping reload.");
+            return;
+        }
+
+        console.log("[MyPlugin]: Data changed, reloading...");
+        // 执行实际重载逻辑
+        // this.doReload(newData);
+
+        this._lastDataJson = currentDataJson;
     }
 
     /**

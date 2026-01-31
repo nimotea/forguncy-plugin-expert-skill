@@ -476,3 +476,101 @@ createContent() {
 476→    -   **配置透明**：用户在设计器中能看到默认值，而不是看到一个“空”但在运行时却有东西。
 477→    -   **减少 Bug**：消除了由于两端逻辑版本不一致导致的渲染异常。
 478→
+479→## 13. 交互幂等性 (Idempotency)：防止状态叠加与内存泄漏
+480→
+481→在实现 `RunTimeMethod` 或 `updateData` 时，频繁触发的调用可能导致重复的 DOM 操作或库初始化。
+482→
+483→-   **核心风险**：某些第三方库（如 `videx-wellog`）的 `reset()` 或 `setTracks()` 并不总是完全覆盖，可能存在资源释放不彻底或节点累加的问题。
+484→-   **解决方案**：在执行逻辑前，先对比“旧值”与“新值”。
+485→
+486→### 实现模式：值对比守卫
+487→
+488→```javascript
+489→class MyPluginCellType extends Forguncy.Plugin.CellTypeBase {
+490→    constructor() {
+491→        super();
+492→        this._lastDataJson = null; // 存储上一次渲染的数据快照
+493→    }
+494→
+495→    updateData(newData) {
+496→        const currentDataJson = JSON.stringify(newData);
+497→        
+498→        // 1. 幂等性检查：如果数据没变，直接返回
+499→        if (this._lastDataJson === currentDataJson) {
+500→            console.log("[MyPlugin]: Data unchanged, skipping update.");
+501→            return;
+502→        }
+503→
+504→        // 2. 执行昂贵的更新操作
+505→        this.performHeavyUpdate(newData);
+506→        
+507→        // 3. 更新快照
+508→        this._lastDataJson = currentDataJson;
+509→    }
+510→
+511→    performHeavyUpdate(data) {
+512→        this._container.empty(); // 彻底清理
+513→        this.initLibrary(data);
+514→    }
+515→}
+516→```
+517→
+518→-   **适用场景**：
+519→    -   **重置/重载逻辑**：避免用户快速连点或公式高频计算导致的性能崩塌。
+520→    -   **复杂 DOM 操作**：防止生成重复的子元素。
+521→    -   **昂贵计算**：如大数据量转换、3D 渲染初始化。
+522→
+523→## 14. 大型插件的代码组织规范：物理拆分与有序加载
+524→
+525→当插件功能变得复杂时，单文件（God File）会导致维护成本指数级上升。活字格支持加载多个 JS 文件，我们可以利用这一点实现简单的模块化。
+526→
+527→-   **推荐结构**：
+528→    -   `Constants.js`：定义全局常量、枚举。
+529→    -   `Utils.js`：通用工具函数（如数据转换、格式化）。
+530→    -   `Core.js` / `Factory.js`：核心业务逻辑或组件工厂。
+531→    -   `Main.js`：继承自 `CellTypeBase` 或 `CommandBase` 的入口类。
+532→
+533→### 实现模式：有序加载 (Ordered Loading)
+534→
+535→由于活字格插件环境不支持 ES Modules (import/export)，各文件通过全局变量（或挂载在插件命名空间下）进行通信。
+536→
+537→#### 1. 定义命名空间 (Constants.js)
+538→
+539→```javascript
+540→// 推荐使用插件 ID 作为命名空间，防止全局污染
+541→var MyPlugin = MyPlugin || {};
+542→MyPlugin.Constants = {
+543→    DEFAULT_COLOR: "red"
+544→};
+545→```
+546→
+547→#### 2. 实现入口逻辑 (Main.js)
+548→
+549→```javascript
+550→class MyCellType extends Forguncy.Plugin.CellTypeBase {
+551→    onRender(container, renderInfo) {
+552→        // 使用在 Constants.js 中定义的常量
+553→        console.log(MyPlugin.Constants.DEFAULT_COLOR);
+554→    }
+555→}
+556→```
+557→
+558→#### 3. 配置加载顺序 (PluginConfig.json)
+559→
+560→**关键点**：`javascript` 数组中的顺序即为浏览器加载顺序。被依赖的文件必须排在前面。
+561→
+562→```json
+563→{
+564→    "javascript": [
+565→        "Scripts/Constants.js",
+566→        "Scripts/Utils.js",
+567→        "Scripts/Main.js"
+568→    ]
+569→}
+570→```
+571→
+572→-   **优势**：
+573→    -   **职责清晰**：开发者可以快速定位到是工具类问题还是业务逻辑问题。
+574→    -   **多人协作**：不同开发者可以负责不同的物理文件，减少 Git 冲突。
+575→    -   **按需加载**：虽然目前活字格是一次性加载，但物理拆分为未来的按需打包打下了基础。
+576→
