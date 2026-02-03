@@ -28,6 +28,8 @@
     <!-- Replace with actual version or path -->
     <PackageReference Include="GrapeCity.Forguncy.ServerApi" Version="X.X.X" />
     <PackageReference Include="GrapeCity.Forguncy.CellTypes" Version="X.X.X" />
+    <!-- 常用依赖 / Common Dependencies -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <!-- 图标文件引用示例 / Icon File Reference Example -->

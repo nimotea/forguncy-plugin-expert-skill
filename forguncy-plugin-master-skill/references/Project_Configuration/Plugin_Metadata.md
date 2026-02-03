@@ -89,21 +89,53 @@
 </PropertyGroup>
 ```
 
-## 3. 内部命令/单元格图标
+## 4. 使用内置工具快速生成专业图标
 
-除了插件包本身的图标，每个具体的命令（ServerCommand/ClientCommand）或单元格（CellType）也可以有自己的图标。这通常通过代码中的特性（Attribute）来配置。
+为了提升开发效率并确保插件在设计器中的专业感，本项目内置了 Logo 生成工具 `generate_logo.py`。
 
-### 使用 Icon 特性
+### 4.1 核心优势
+- **即时生成**：无需离开 IDE 即可生成符合规范的 SVG 图标。
+- **专业语义**：支持 `gantt` (甘特图)、`chart` (图表)、`db` (数据库)、`gear` (设置/处理) 等多种语义化占位符。
+- **自动布局**：自动平衡文字与图标的位置，确保在高分屏下依然清晰。
 
-```csharp
-[Icon("pack://application:,,,/MyPluginNamespace;component/Resources/CommandIcon.png")]
-public class MyCommand : Command
-{
-    // ...
-}
+### 4.2 调用方式
+AI 助手或开发者可以通过以下命令生成图标：
+
+```bash
+python scripts/generate_logo.py <项目路径> --text "APS" --type gantt
 ```
 
-*   注意：内部图标通常作为嵌入资源 (`Embedded Resource`) 处理，路径格式为 WPF Pack URI。
+**参数说明**：
+- `--text`: 显示在图标下方的文字（建议 2-4 个大写字母）。
+- `--type`: 图标类型，可选 `text`, `gantt`, `chart`, `db`, `gear`。
+- `--name`: 输出文件名，默认为 `icon.svg`。
+### 4.3 在代码中引用
+生成的图标默认存放在项目的 `Resources/` 目录下。
+
+| 用途                | 推荐格式             | 引用方式示例                                           |
+| :------------------ | :------------------- | :----------------------------------------------------- |
+| **插件主图标**      | **.png** (强制)      | `PluginConfig.json` -> `"image": "Resources/icon.png"` |
+| **命令/单元格图标** | **.svg** 或 **.png** | `[Icon("Resources/icon.svg")]`                         |
+
+> **风险警示**：活字格设计器在解析 `PluginConfig.json` 时有硬性的格式校验，主图标 **必须** 使用 `.png` 格式，否则会导致插件加载失败或打包报错。
+
+### 4.4 自动化生成与同步
+AI 助手或开发者可以通过以下命令一次性生成两种格式，并自动同步到项目中：
+
+```bash
+python scripts/generate_logo.py <项目路径> --text "FP" --type gantt --sync
+```
+
+#### 可用图标类型 (`--type`)
+| 类型    | 图形内容      | 推荐场景                              |
+| :------ | :------------ | :------------------------------------ |
+| `text`  | 仅文字        | 通用占位符                            |
+| `gantt` | 甘特图条块    | **APS、生产计划、任务调度** 类插件    |
+| `chart` | 柱状图        | **报表、分析、监控看板** 类插件       |
+| `db`    | 数据库/圆柱体 | **数据集成、中间件、存储** 类插件     |
+| `gear`  | 齿轮/设置     | **系统工具、自动化、后台任务** 类插件 |
+
+> **提示**：使用 `--sync` 参数可以自动识别并覆盖项目中的 `PluginLogo.png` 或 `Icon.png` 等常见文件名，避免手动重命名。*   注意：内部图标通常作为嵌入资源 (`Embedded Resource`) 处理，路径格式为 WPF Pack URI。
 *   需要在 `.csproj` 中将这些图标设置为 `Embedded resource`。
 
 ```xml

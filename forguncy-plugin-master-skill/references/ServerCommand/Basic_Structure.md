@@ -89,3 +89,16 @@ namespace MyPlugin
 
 ### 数据回写
 - `dataContext.Parameters[VariableName] = value;` 是将数据回传给活字格引擎的标准方式。后续的命令可以通过该变量名获取到这个值。
+
+## 4. 常见依赖与版本兼容性 (Compatibility)
+
+### 常用 NuGet 包
+- **Newtonsoft.Json**: 绝大多数服务端插件都需要处理 JSON 数据，建议在项目初始化后立即通过 `dotnet add package Newtonsoft.Json` 安装。
+
+### SDK 版本差异提醒
+- **日志记录 (Logging)**:
+  - 在 v11 及更高版本中，`IServerCommandExecuteContext` 可能不再直接暴露 `Logger` 属性。
+  - **推荐做法**: 检查 `context.Log` 接口，或使用 `GrapeCity.Forguncy.ServerApi` 中定义的日志条目模型进行记录。
+- **属性校验 (Validation)**:
+  - `[RequiredProperty]` 特性在某些 SDK 版本中可能不可用。
+  - **推荐做法**: 在 `ExecuteAsync` 方法开始处手动检查关键参数是否为 `null`，并返回包含错误信息的 `ExecuteResult`。

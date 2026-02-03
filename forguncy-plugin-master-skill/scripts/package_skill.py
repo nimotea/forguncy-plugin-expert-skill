@@ -120,6 +120,14 @@ def package_skill(skill_path, output_dir=None, format='zip'):
             # Create package.json
             create_package_json(output_path, skill_name, version)
             
+            # Create special rules directory in build for skill-apply.md
+            internal_rule_src = skill_path / "assets" / "internal" / "forguncy-plugin-skill-apply.md"
+            if internal_rule_src.exists():
+                rules_dir = output_path / "rules"
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(internal_rule_src, rules_dir / "forguncy-plugin-skill-apply.md")
+                print(f"  Generated: rules/forguncy-plugin-skill-apply.md (from internal assets)")
+
             print(f"\n✅ Successfully built skill to: {output_path}")
             return output_path
 

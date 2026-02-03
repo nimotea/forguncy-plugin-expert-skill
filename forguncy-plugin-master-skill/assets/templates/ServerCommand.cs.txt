@@ -22,6 +22,11 @@ namespace MyPluginNamespace
         {
             try
             {
+                // 日志记录规范：
+                // v11+ 推荐使用 context.Log 接口（如果可用）
+                // 或使用传统的 dataContext.Log.WriteLog(new LogEntry(...))
+                // context.Parameters["Log"]?.ToString(); // 某些场景下的平替方案
+
                 // 1. Evaluate Formula
                 var value = await context.EvaluateFormulaAsync(SampleProperty);
 

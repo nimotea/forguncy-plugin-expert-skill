@@ -63,6 +63,24 @@ description: 协助开发者初始化、编写和规范化活字格插件代码�
     - 优先使用活字格内置功能。
     - 保持工程结构扁平，避免不必要的抽象层。
 
+## 辅助工具与脚本
+
+为了提升开发效率，本项目提供了以下配套工具：
+
+1.  **项目初始化器 (`scripts/init_project.ps1`)**：
+    - 自动定位并启动“活字格插件构建器” GUI 工具。
+    - **交互增强**：支持在初始化过程中询问并自动生成插件 Logo。
+2.  **Logo 生成器 (`scripts/generate_logo.py`)**：
+    - **用途**：为插件快速生成符合规范的 SVG 图标（用于代码）和 PNG 图标（用于元数据）。
+    - **风险警示 (Critical)**：活字格设计器要求插件主图标（`PluginConfig.json` 中的 `image` 属性）必须为 **.png** 格式。生成的 `.svg` 文件仅适用于代码中的 `[Icon]` 特性。
+    - **同步建议**：调用 `generate_logo.py` 时建议加上 `--sync` 参数，工具会自动识别并覆盖项目中的 `PluginLogo.png` 或 `Icon.png`，防止因文件名不一致（如大小写）导致引用丢失。
+    - **防御性检查**：生成后请务必确认 `Resources` 目录下的旧图标已被替换，且文件名与代码引用严格一致。
+    - **调用方式**：`python scripts/generate_logo.py <项目路径> --text "文字" --type gantt --sync`
+    - **集成**：脚本默认会同时生成 `icon.svg` 和 `icon.png`。
+3.  **打包工具 (`scripts/package_skill.ps1`)**：
+    - 验证 Skill 完整性并将资源打包至 `build` 目录。
+    - **自动映射**：打包时会自动将 `assets/internal` 中的规则文件映射到 `build/rules` 下。
+
 ## 指令
 
 请严格遵循 `references/SOP.md` 定义的流程以及以下步骤来处理用户的请求：
