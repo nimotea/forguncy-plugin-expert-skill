@@ -36,7 +36,8 @@
    - **埋点**：带有 `[PluginName]` 前缀的日志记录。
 
 ## 阶段五：构建、测试与维护 (Maintenance)
-1. **构建**：`dotnet build`。若配置了 `ForguncyPluginPackageTool`，构建成功即自动打包。
+1. **构建**：直接执行 `dotnet build`。
+   - **注意**：仅需编译通过即可，无需关注或操作 `.fcp` 文件。
 2. **验证**：在设计器安装并测试功能，检查 F12 控制台日志。
 3. **重构**：删除类文件后必须清理 `PluginConfig.json` 中的无效引用。
 4. **修复**：若引用丢失，运行 `scripts/update_references.ps1`。

@@ -42,18 +42,31 @@ public class MyPluginCellTypeDesigner : CellTypeDesigner<MyPluginCellType>
 ### JS 端区分设计时与运行时
 在 JS 代码中，可以通过 `this.isDesignerPreview` 判断当前是否处于设计时预览模式。
 
+#### 最佳实践：防止预览“白屏” (Error Handling)
+在开发过程中，JS 错误会导致设计器中的插件区域直接变成空白，无法调试。建议使用 `try-catch` 包裹渲染逻辑，并将错误显示在设计器中。
+
 ```javascript
 class MyPluginCellType extends Forguncy.Plugin.CellTypeBase {
     createContent() {
         const container = $("<div></div>");
         
-        // 设计时特殊逻辑：如果属性为空，显示提示文本
-        if (this.isDesignerPreview && !this.CellElement.CellType.Title) {
-            container.append($("<div style='color:gray'>请设置标题</div>"));
-        } else {
-            // 运行时正常逻辑
-            container.text(this.CellElement.CellType.Title);
+        try {
+            // 核心渲染逻辑
+            this.render(container);
+            
+            // 设计时特殊逻辑：如果属性为空，显示提示文本
+            if (this.isDesignerPreview && !this.CellElement.CellType.Title) {
+                container.append($("<div style='color:gray'>请设置标题</div>"));
+            }
+        } catch (e) {
+            console.error(e);
+            // 仅在设计时显示错误堆栈，方便排查
+            if (this.isDesignerPreview) {
+                container.css({ color: "red", padding: "5px", border: "1px solid red" })
+                         .text("Preview Error: " + e.message);
+            }
         }
+        
         return container;
     }
 }
