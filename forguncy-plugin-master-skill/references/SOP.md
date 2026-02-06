@@ -35,9 +35,20 @@
    - **交互幂等性 (Idempotency)**：在执行昂贵的 UI 操作（如重绘、重置）前，**必须**进行状态对比。如果输入参数未发生变化，应直接跳过操作，防止内存泄漏 and 不必要的性能损耗。
    - **埋点**：带有 `[PluginName]` 前缀的日志记录。
 
-## 阶段五：构建、测试与维护 (Maintenance)
+## 阶段五：构建与维护 (Build & Maintenance)
 1. **构建**：直接执行 `dotnet build`。
    - **注意**：仅需编译通过即可，无需关注或操作 `.fcp` 文件。
 2. **验证**：在设计器安装并测试功能，检查 F12 控制台日志。
-3. **重构**：删除类文件后必须清理 `PluginConfig.json` 中的无效引用。
-4. **修复**：若引用丢失，运行 `scripts/update_references.ps1`。
+3. **代码维护 (Refactoring)**：
+   - **API 迁移**：使用 `grep` 或 `Find` 定位旧接口（如 `IGenerateContext`），进行小步替换与验证。
+   - **清理**：删除类文件后必须清理 `PluginConfig.json` 中的无效引用。
+   - **修复**：若引用丢失，运行 `scripts/update_references.ps1`。
+
+## 阶段六：发布与市场 (Publishing)
+1. **市场资料准备**：
+   - **模板**：基于 `assets/templates/Market_Description_Template.md` 创建上架文档。
+   - **同步**：检查 `PluginConfig.json` 确保插件 ID/名称与市场信息一致；从 `README.md` 提取最新的功能描述。
+   - **生成**：填充模板中的占位符（包括版本、作者、截图链接），确保文档符合葡萄城市场规范。
+2. **最终打包**：
+   - 执行 `dotnet build -c Release`。
+   - 交付物为 `bin/Release/net6.0/` 目录下的 zip 包。
