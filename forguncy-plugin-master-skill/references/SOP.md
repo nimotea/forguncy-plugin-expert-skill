@@ -47,7 +47,10 @@
 ## 阶段六：发布与市场 (Publishing)
 1. **市场资料准备**：
    - **模板**：基于 `assets/templates/Market_Description_Template.md` 创建上架文档。
-   - **同步**：检查 `PluginConfig.json` 确保插件 ID/名称与市场信息一致；从 `README.md` 提取最新的功能描述。
+   - **同步**：
+     - 检查 `PluginConfig.json` 确保插件 ID/名称与市场信息一致。
+     - **图标一致性检查**：确保 `PluginConfig.json` 的 `"image"` 字段引用的文件（如 `PluginLogo.png`）与 `[Icon]` 特性使用的图标在视觉上保持一致。
+     - 从 `README.md` 提取最新的功能描述。
    - **生成**：填充模板中的占位符（包括版本、作者、截图链接），确保文档符合葡萄城市场规范。
 2. **最终打包**：
    - 执行 `dotnet build`。

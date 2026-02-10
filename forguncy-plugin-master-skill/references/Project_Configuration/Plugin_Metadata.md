@@ -87,6 +87,14 @@
   <PackageIcon>icon.png</PackageIcon>
   ...
 </PropertyGroup>
+
+> **🔔 重要提示：双重同步 (Dual Sync)**
+> 开发者经常只更新了命令/单元格的 `[Icon]` 或 `.csproj` 中的 `PackageIcon`，而忽略了 `PluginConfig.json` 中的 `image` 字段。
+> *   **表现差异**：`PluginConfig.json` 控制设计器插件列表中的图标，而 `[Icon]` 控制页面设计器左侧工具箱中的图标。
+> *   **操作建议**：每次更新图标时，请务必同时检查 `PluginConfig.json`：
+>     ```json
+>     "image": "Resources/PluginLogo.png" // 确保此文件与你的主图标保持视觉一致
+>     ```
 ```
 
 ## 4. 使用内置工具快速生成专业图标
