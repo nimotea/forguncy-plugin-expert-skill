@@ -71,6 +71,62 @@
 
 ---
 
-## 4. 开发建议
+## 4. 动态字段映射 (Dynamic Field Mapping)
+
+当插件需要处理结构不固定的数据（如 JSON 导入、第三方 API 对接）时，使用固定的 DTO 类（配合 `[JsonProperty]`）会极大限制灵活性。
+
+**传统痛点**：用户必须在活字格中使用“设置变量”或 SQL 别名来重命名字段，以匹配插件写死的属性名。
+
+**推荐方案**：使用 `List<MappingItem>` 配合 `JObject` 实现动态映射。
+
+### 4.1 定义映射类
+```csharp
+public class ColumnMapping
+{
+    [DisplayName("源字段 (API/JSON)")]
+    [Description("数据源中的字段名，例如: user_name")]
+    public string SourceField { get; set; }
+
+    [DisplayName("目标列 (表格/变量)")]
+    [Description("活字格中的列名或属性名，例如: 姓名")]
+    public string TargetField { get; set; }
+}
+```
+
+### 4.2 插件属性定义
+```csharp
+[DisplayName("字段映射配置")]
+[ObjectListProperty]
+public List<ColumnMapping> Mappings { get; set; }
+```
+
+### 4.3 运行时处理逻辑
+```csharp
+public override ExecuteResult Execute(IServerCommandExecuteContext dataContext)
+{
+    // 假设 apiData 是从外部获取的 JObject
+    var apiData = JObject.Parse(jsonContent);
+    var resultDict = new Dictionary<string, object>();
+
+    foreach (var mapping in Mappings)
+    {
+        // 1. 根据 SourceField 从源数据获取值
+        var value = apiData[mapping.SourceField]?.ToObject<object>();
+        
+        // 2. 映射到用户指定的 TargetField
+        if (!string.IsNullOrEmpty(mapping.TargetField))
+        {
+            resultDict[mapping.TargetField] = value;
+        }
+    }
+
+    // resultDict 现在包含了用户期望的键值对，可以直接用于更新表格或返回
+    return ExecuteResult.CreateSuccess(resultDict);
+}
+```
+
+---
+
+## 5. 开发建议
 - **简洁性**：优先使用基础类型，仅在必要时引入复杂对象。
 - **安全性**：对所有属性值进行防御性编程，处理 `null` 或 `undefined` 的情况。

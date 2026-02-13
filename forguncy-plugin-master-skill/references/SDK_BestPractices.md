@@ -73,9 +73,42 @@
 - 手动分别修改 JSON 和 CSPROJ，导致不一致。
 - 发布了新功能但忘记修改 Version，导致用户无法更新。
 
-## 6. 前端运行时日志埋点规范
+## 7. 条件必填字段校验 (Conditional Validation)
 
-在插件渲染（`onRender`）或执行（`execute`）过程中，应包含关键节点的日志输出，以便于在生产环境中快速定位问题。
+活字格插件的属性面板虽然支持 `GetDesignerPropertyVisible` 来动态隐藏属性，但隐藏并不等于校验。为了保证运行时稳定，必须在 `Execute` 或 `onRender` 阶段进行“条件必填”校验。
+
+### 场景示例
+当 `AuthMode` 选择为 `OAuth` 时，`Token` 字段必填；当选择 `Basic` 时，`Username` 和 `Password` 必填。
+
+### 服务端实现 (C#)
+```csharp
+public override ExecuteResult Execute(IServerCommandExecuteContext dataContext)
+{
+    // 1. 基础非空校验
+    if (this.AuthType == AuthMode.OAuth)
+    {
+        if (string.IsNullOrWhiteSpace(this.Token))
+        {
+            return ExecuteResult.CreateError("当认证模式为 OAuth 时，[Token] 属性不能为空。");
+        }
+    }
+    else if (this.AuthType == AuthMode.Basic)
+    {
+        if (string.IsNullOrWhiteSpace(this.Username) || string.IsNullOrWhiteSpace(this.Password))
+        {
+            return ExecuteResult.CreateError("当认证模式为 Basic 时，[用户名] 和 [密码] 均不能为空。");
+        }
+    }
+
+    // 2. 业务逻辑...
+}
+```
+
+### 关键原则
+1.  **Fail Fast**: 在执行任何昂贵操作（如网络请求、数据库查询）之前，先校验参数。
+2.  **Explicit Error**: 错误信息必须包含“具体的条件”和“缺失的字段名”，方便用户自查。
+
+## 8. 前端运行时日志埋点规范
 
 - **统一前缀**：所有日志必须带有 `[PluginName]` 前缀。
 - **关键节点**：
