@@ -61,12 +61,43 @@
 - **服务端处理**：`context.EvaluateFormula(DynamicValue)`。
 - **前端处理**：`this.evaluateFormulaAsync(this.CellElement.CellType.DynamicValue)`。
 
-### 3.2 列表与对象 (Object / List)
-- **C# 定义**：
-  ```csharp
-  [DisplayName("配置列表")]
-  public List<MyItem> Items { get; set; }
-  ```
+### 3.2 列表与对象列表 (List / ObjectList)
+
+活字格区分“基础类型列表”和“复杂对象列表”，两者必须使用不同的 Attribute。
+
+#### A. 基础列表 (ListProperty)
+适用于 `List<string>`, `List<int>` 等简单类型。
+
+```csharp
+[DisplayName("IP 白名单")]
+[ListProperty] // 必须标记
+public List<string> IpWhitelist { get; set; }
+```
+
+#### B. 对象列表 (ObjectListProperty)
+适用于自定义类的列表（如 `List<MyItem>`）。
+
+**强制规则**：
+1.  属性必须标记 `[ObjectListProperty]`。
+2.  **关键**：列表项类（Item Class）必须继承 `ObjectPropertyBase`，否则在设计器中无法正确解析子属性。
+
+```csharp
+[DisplayName("配置项列表")]
+[ObjectListProperty] // 规则 1
+public List<MyConfigItem> Items { get; set; }
+
+// 规则 2: 必须继承 ObjectPropertyBase
+public class MyConfigItem : ObjectPropertyBase
+{
+    [DisplayName("键")]
+    public string Key { get; set; }
+
+    [DisplayName("值")]
+    [FormulaProperty]
+    public object Value { get; set; }
+}
+```
+
 - **注意**：复杂对象会自动序列化为 JSON 字符串传递给前端。
 
 ---
