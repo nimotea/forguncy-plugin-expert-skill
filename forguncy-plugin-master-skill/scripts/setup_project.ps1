@@ -28,45 +28,9 @@ try {
     }
 
     # Logo Generation Prompt
+    # Removed as per user request (User will explicitly ask for logo generation)
+    
     Write-Host "`n=== Plugin Configuration ===" -ForegroundColor Cyan
-    Write-Host "Do you want to generate a professional plugin logo? (Y/N)" -ForegroundColor Yellow
-    $response = Read-Host
-    if ($response -eq 'Y' -or $response -eq 'y') {
-        Write-Host "Select logo icon type:"
-        Write-Host "1. Text only (Default)"
-        Write-Host "2. Gantt (Industrial/APS)"
-        Write-Host "3. Chart (Analytics/Reports)"
-        Write-Host "4. Database (Storage/Data)"
-        Write-Host "5. Gear (Tools/Processing)"
-        $typeIdx = Read-Host "Choice [1-5]"
-        $LogoType = switch ($typeIdx) {
-            "2" { "gantt" }
-            "3" { "chart" }
-            "4" { "db" }
-            "5" { "gear" }
-            Default { "text" }
-        }
-
-        $LogoText = Read-Host "Enter 2-3 characters for the logo (e.g. APS)"
-        if ([string]::IsNullOrWhiteSpace($LogoText)) { $LogoText = "FP" }
-        
-        $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-        $GenerateLogoScript = Join-Path $ScriptDir "generate_logo.py"
-        
-        if (Test-Path $GenerateLogoScript) {
-            # Use --sync to automatically overwrite existing logos
-            python $GenerateLogoScript $TargetPath --text $LogoText --type $LogoType --sync
-            Write-Host "Logos generated and synchronized in $ProjectName\Resources\" -ForegroundColor Green
-            
-            Write-Host "`n[Important] For PluginConfig.json (Main Icon), use:" -ForegroundColor Yellow
-            Write-Host "Resources/PluginLogo.png (or your custom name)" -ForegroundColor White
-            Write-Host "`n[Tip] For Command/CellType class [Icon] attribute, use:" -ForegroundColor Cyan
-            Write-Host "[Icon(""pack://application:,,,/$ProjectName;component/Resources/PluginLogo.png"")]" -ForegroundColor White
-        } else {
-            Write-Warning "Logo generation script not found at $GenerateLogoScript"
-        }
-    }
-
     Write-Host "`nDo you want to add common dependencies (Newtonsoft.Json)? (Y/N)" -ForegroundColor Yellow
     $addJson = Read-Host
     if ($addJson -eq 'Y' -or $addJson -eq 'y') {

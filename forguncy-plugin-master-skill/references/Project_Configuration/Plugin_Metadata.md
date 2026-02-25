@@ -120,19 +120,26 @@ python scripts/generate_logo.py <项目路径> --text "APS" --type gantt
 ### 4.3 在代码中引用
 生成的图标默认存放在项目的 `Resources/` 目录下。
 
-| 用途                | 推荐格式             | 引用方式示例                                           |
-| :------------------ | :------------------- | :----------------------------------------------------- |
-| **插件主图标**      | **.png** (强制)      | `PluginConfig.json` -> `"image": "Resources/icon.png"` |
-| **命令/单元格图标** | **.svg** 或 **.png** | `[Icon("Resources/icon.svg")]`                         |
+| 用途                | 推荐文件名           | 尺寸/格式        | 引用方式示例                                                                 |
+| :------------------ | :------------------- | :--------------- | :--------------------------------------------------------------------------- |
+| **插件主图标**      | **PluginLogo.png**   | 100x100 (PNG)    | `PluginConfig.json` -> `"image": "Resources/PluginLogo.png"`                 |
+| **命令/单元格图标** | **CommandIcon.png**  | 16x16 (PNG)      | `[Icon("pack://application:,,,/ProjectName;component/Resources/CommandIcon.png")]` |
 
-> **风险警示**：活字格设计器在解析 `PluginConfig.json` 时有硬性的格式校验，主图标 **必须** 使用 `.png` 格式，否则会导致插件加载失败或打包报错。
+> **最佳实践**：
+> - **PluginLogo.png** (100px)：用于插件管理界面，大尺寸更清晰。
+> - **CommandIcon.png** (16px)：用于设计器左侧工具箱，小尺寸（16x16）能避免缩放模糊，且必须设置为 `Embedded Resource`。
 
 ### 4.4 自动化生成与同步
-AI 助手或开发者可以通过以下命令一次性生成两种格式，并自动同步到项目中：
+AI 助手或开发者可以通过以下命令一次性生成两种规格的图标：
 
 ```bash
-python scripts/generate_logo.py <项目路径> --text "FP" --type gantt --sync
+python scripts/generate_logo.py <项目路径> --text "FP" --type gantt
 ```
+
+该命令会自动生成：
+1.  `Resources/PluginLogo.png` (100x100)
+2.  `Resources/CommandIcon.png` (16x16)
+3.  `Resources/icon.svg` (矢量源文件)
 
 #### 可用图标类型 (`--type`)
 | 类型    | 图形内容      | 推荐场景                              |
