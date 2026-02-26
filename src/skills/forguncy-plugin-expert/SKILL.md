@@ -1,5 +1,5 @@
 ---
-name: 活字格 (Forguncy) 插件专家
+name: forguncy-plugin-expert
 description: 协助开发者初始化、编写和规范化活字格插件代码，支持服务器端命令和前端单元格类型的开发。
 ---
 

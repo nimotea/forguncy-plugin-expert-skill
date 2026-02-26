@@ -1,0 +1,90 @@
+name: Release Skill Distribution
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # Install Pillow if needed for logo generation/validation
+          pip install Pillow
+
+      - name: Build Skill Distribution
+        run: |
+          # Package the 'forguncy-plugin-expert' skill to 'dist' directory
+          python scripts/package_skill.py forguncy-plugin-expert dist
+
+      - name: Deploy to Distribution Repository
+        env:
+          # You need to add this secret in your repository settings -> Secrets and variables -> Actions
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+          # REPLACE WITH YOUR TARGET REPOSITORY (e.g., username/repo-name)
+          TARGET_REPOSITORY: "nimotea/forguncy-plugin-skill-publish"
+          # The email for the commit
+          COMMIT_EMAIL: "actions@github.com"
+          # The name for the commit
+          COMMIT_NAME: "GitHub Actions"
+          # Target branch
+          TARGET_BRANCH: "main"
+        run: |
+          echo "Deploying to $TARGET_REPOSITORY on branch $TARGET_BRANCH"
+          
+          # 1. Setup git
+          git config --global user.email "$COMMIT_EMAIL"
+          git config --global user.name "$COMMIT_NAME"
+
+          # 2. Clone the target repository
+          # Using a temporary directory
+          git clone --depth 1 --branch $TARGET_BRANCH "https://x-access-token:$API_TOKEN_GITHUB@github.com/$TARGET_REPOSITORY.git" target_repo || \
+          git clone --depth 1 "https://x-access-token:$API_TOKEN_GITHUB@github.com/$TARGET_REPOSITORY.git" target_repo
+
+          cd target_repo
+          
+          # If branch doesn't exist (cloned default), checkout -b
+          current_branch=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$current_branch" != "$TARGET_BRANCH" ]; then
+            git checkout -b $TARGET_BRANCH
+          fi
+
+          # 3. Clean existing files (except .git) to ensure sync with build output
+          find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
+
+          # 4. Copy build artifacts
+          # Note: We are copying from the 'dist' directory created in previous step
+          cp -r ../dist/* .
+
+          # 5. Commit and Push
+          git add .
+          
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Release ${{ github.ref_name }}"
+            git push origin $TARGET_BRANCH
+          fi
+
+          # 6. Tag the release
+          # Delete tag if it already exists (to update it)
+          if git rev-parse "${{ github.ref_name }}" >/dev/null 2>&1; then
+            git tag -d "${{ github.ref_name }}"
+            git push origin --delete "${{ github.ref_name }}" || true
+          fi
+          
+          git tag "${{ github.ref_name }}"
+          git push origin "${{ github.ref_name }}"

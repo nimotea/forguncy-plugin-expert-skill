@@ -1,0 +1,12 @@
+{
+  "name": "forguncy-plugin-builder",
+  "version": "1.0.0",
+  "description": "Builder project for Forguncy Plugin Skills",
+  "scripts": {
+    "build": "powershell -File scripts/package_skill.ps1",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
