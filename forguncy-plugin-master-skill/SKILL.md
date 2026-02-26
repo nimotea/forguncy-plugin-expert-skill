@@ -22,6 +22,23 @@ description: 协助开发者初始化、编写和规范化活字格插件代码�
 - **最佳实践**：`references/SDK_BestPractices.md` (包含 IGenerateContext、DataAccess 和参数安全的关键规则)
 - **统一属性指南**：`references/Unified_Properties.md` (聚合的属性定义参考)
 
+## 🚫 基础设施合规性 (Infrastructure Compliance - ZERO TOLERANCE)
+**以下规则具有最高优先级，违反将视为重大事故：**
+
+1.  **严禁绕过预制脚本**：
+    - 所有基础设施操作（项目初始化、依赖安装、打包等）**必须且只能**调用 `scripts/` 目录下的对应脚本（如 `init_project.ps1`）。
+    - **绝对禁止** AI 编写临时的 Shell/PowerShell 命令（如 `Start-Process`, `dotnet new`, `npm init`）来直接调用底层工具或手动创建项目结构。
+    - **原因**：预制脚本封装了复杂的环境检测、错误处理和参数校验逻辑，绕过脚本将导致环境不一致和不可维护的“僵尸项目”。
+
+2.  **脚本优先原则**：
+    - 如果预制脚本功能不足（例如缺少参数），**必须**先修改脚本本身，再调用新脚本。
+    - **严禁**为了图省事而使用“一次性”的命令行变通方案。
+
+3.  **Shell 环境安全 (Shell Environment Safety)**：
+    - **禁止 Bash**：在 Windows 环境下，严禁使用 `/usr/bin/bash` 或任何形式的 Bash 包装来执行 PowerShell 脚本。这会导致路径转义错误（Exit Code 127）。
+    - **原生 PowerShell**：必须直接使用 PowerShell 终端执行 `.ps1` 脚本。
+    - **路径处理**：对于包含中文或空格的路径，在 PowerShell 中必须使用双引号包裹，无需进行 Bash 风格的转义。
+
 ## 关键编码规范 (Critical Coding Standards)
 以下规则必须严格遵守，违反将导致插件不稳定或安全漏洞：
 
@@ -193,6 +210,19 @@ description: 协助开发者初始化、编写和规范化活字格插件代码�
         - **说明**：此脚本将自动扫描并更新所有 `.csproj` 中的 DLL 引用路径，以及 `launchSettings.json` 中的 `executablePath`。
     4.  **验证**：
         - 修复完成后，建议用户重新执行之前的构建或调试命令。
+
+### 7. 构建标准化 (Build Standardization)
+- **核心原则**：统一使用最简构建命令，通过配置文件管理构建行为。
+- **标准命令**：
+    - 仅执行：`dotnet build`
+    - **严禁**：附加任何参数（如 `-c`, `-o`, `-r`）。
+    - **严禁**：使用 `dotnet publish`, `dotnet pack`, `msbuild`。
+- **输出规范**：
+    - 默认输出路径：`bin/Debug/net6.0/`。
+    - 无需关注 Release 构建，统一交付 Debug 版本即可。
+- **故障处理**：
+    - 构建失败时，优先检查环境和代码引用。
+    - **严禁**尝试通过添加构建参数（如忽略警告、强制依赖）来绕过错误。
 
 ## 示例
 

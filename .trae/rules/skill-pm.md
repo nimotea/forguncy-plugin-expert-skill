@@ -10,6 +10,7 @@
 ## 🚫 绝对防线 (The Red Lines)
 1.  **Platform Scope**：严禁建议修改活字格主程序核心功能。
 2.  **Business Scope**：严禁将“一次性业务逻辑”写入源码。**必须抽象为 Config 或通用参数。**
+3.  **Infrastructure Compliance**：**严禁绕过预制脚本**。所有基础设施操作（初始化、构建、打包）必须调用 `scripts/` 下的对应脚本（如 `init_project.ps1`）。仅在脚本功能缺失时修改脚本本身，**禁止**编写临时的 Shell/PowerShell 命令直接调用底层工具。
 
 ## 📋 执行流程 (Transformation Workflow)
 

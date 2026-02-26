@@ -100,58 +100,64 @@
 ## 4. 使用内置工具快速生成专业图标
 
 为了提升开发效率并确保插件在设计器中的专业感，本项目内置了 Logo 生成工具 `generate_logo.py`。
+该工具基于 `Pillow` 库，能够生成高质量、抗锯齿的圆角渐变 PNG 图标。
 
 ### 4.1 核心优势
-- **即时生成**：无需离开 IDE 即可生成符合规范的 SVG 图标。
-- **专业语义**：支持 `gantt` (甘特图)、`chart` (图表)、`db` (数据库)、`gear` (设置/处理) 等多种语义化占位符。
-- **自动布局**：自动平衡文字与图标的位置，确保在高分屏下依然清晰。
+- **高质量渲染**：支持抗锯齿 (Anti-aliasing)、渐变背景 (Gradient) 和圆角 (Rounded Corners)。
+- **双尺寸输出**：一次运行同时生成 `PluginLogo.png` (100x100) 和 `CommandIcon.png` (16x16)，满足不同场景需求。
+- **AI 友好设计**：支持通过 JSON 配置文件或命令行参数灵活注入创意（颜色、文字），实现“实现路径固定，创意由 AI 注入”。
 
 ### 4.2 调用方式
 AI 助手或开发者可以通过以下命令生成图标：
 
 ```bash
-python scripts/generate_logo.py <项目路径> --text "APS" --type gantt
+# 简单模式：指定文字和颜色
+python scripts/generate_logo.py --text "FP" --bg-start "#4E73DF" --bg-end "#224ABE"
+
+# 高级模式：使用配置文件
+python scripts/generate_logo.py --config my_logo_config.json
 ```
 
-**参数说明**：
-- `--text`: 显示在图标下方的文字（建议 2-4 个大写字母）。
-- `--type`: 图标类型，可选 `text`, `gantt`, `chart`, `db`, `gear`。
-- `--name`: 输出文件名，默认为 `icon.svg`。
-### 4.3 在代码中引用
-生成的图标默认存放在项目的 `Resources/` 目录下。
+**命令行参数说明**：
+- `--text`: 显示在图标上的文字（建议 2 个字母，如 "FP"）。
+- `--bg-start`: 背景渐变起始颜色 (Hex)。
+- `--bg-end`: 背景渐变结束颜色 (Hex)。
+- `--config`: JSON 配置文件路径。
 
-| 用途                | 推荐文件名           | 尺寸/格式        | 引用方式示例                                                                 |
-| :------------------ | :------------------- | :--------------- | :--------------------------------------------------------------------------- |
-| **插件主图标**      | **PluginLogo.png**   | 100x100 (PNG)    | `PluginConfig.json` -> `"image": "Resources/PluginLogo.png"`                 |
-| **命令/单元格图标** | **CommandIcon.png**  | 16x16 (PNG)      | `[Icon("pack://application:,,,/ProjectName;component/Resources/CommandIcon.png")]` |
+### 4.3 配置文件示例 (JSON)
+AI 可以生成如下配置来控制 Logo 样式：
 
-> **最佳实践**：
-> - **PluginLogo.png** (100px)：用于插件管理界面，大尺寸更清晰。
-> - **CommandIcon.png** (16px)：用于设计器左侧工具箱，小尺寸（16x16）能避免缩放模糊，且必须设置为 `Embedded Resource`。
-
-### 4.4 自动化生成与同步
-AI 助手或开发者可以通过以下命令一次性生成两种规格的图标：
-
-```bash
-python scripts/generate_logo.py <项目路径> --text "FP" --type gantt
+```json
+[
+  {
+    "output_path": "PluginLogo.png",
+    "size": [100, 100],
+    "text": "AI",
+    "font_size_ratio": 0.5,
+    "bg_color_start": "#FF5733",
+    "bg_color_end": "#C70039",
+    "text_color": "#FFFFFF",
+    "border_radius_ratio": 0.2
+  },
+  {
+    "output_path": "CommandIcon.png",
+    "size": [16, 16],
+    "text": "AI",
+    "font_size_ratio": 0.7,
+    "bg_color_start": "#FF5733",
+    "bg_color_end": "#C70039"
+  }
+]
 ```
 
-该命令会自动生成：
-1.  `Resources/PluginLogo.png` (100x100)
-2.  `Resources/CommandIcon.png` (16x16)
-3.  `Resources/icon.svg` (矢量源文件)
+### 4.4 自动生成产物
+运行脚本后，将在当前目录（或指定路径）生成：
+1.  **PluginLogo.png** (100x100)：用于 `PluginConfig.json` 的 `image` 字段，展示在插件管理列表。
+2.  **CommandIcon.png** (16x16)：用于 C# 代码的 `[Icon]` 属性，展示在设计器工具箱（建议设置为 Embedded Resource）。
 
-#### 可用图标类型 (`--type`)
-| 类型    | 图形内容      | 推荐场景                              |
-| :------ | :------------ | :------------------------------------ |
-| `text`  | 仅文字        | 通用占位符                            |
-| `gantt` | 甘特图条块    | **APS、生产计划、任务调度** 类插件    |
-| `chart` | 柱状图        | **报表、分析、监控看板** 类插件       |
-| `db`    | 数据库/圆柱体 | **数据集成、中间件、存储** 类插件     |
-| `gear`  | 齿轮/设置     | **系统工具、自动化、后台任务** 类插件 |
+> **注意**：脚本依赖 `Pillow` 库，使用前请运行 `pip install Pillow`。
 
-> **提示**：使用 `--sync` 参数可以自动识别并覆盖项目中的 `PluginLogo.png` 或 `Icon.png` 等常见文件名，避免手动重命名。*   注意：内部图标通常作为嵌入资源 (`Embedded Resource`) 处理，路径格式为 WPF Pack URI。
-*   需要在 `.csproj` 中将这些图标设置为 `Embedded resource`。
+此外，**CommandIcon.png** 必须在 `.csproj` 中设置为嵌入资源 (`Embedded Resource`) 才能在 C# 代码中通过 Pack URI 引用：
 
 ```xml
 <ItemGroup>

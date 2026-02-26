@@ -10,6 +10,7 @@
 *   **最佳实践**: [SDK_BestPractices.md](SDK_BestPractices.md)
 *   **统一属性指南**: [Unified_Properties.md](Unified_Properties.md)
 *   **API 速查表**: [API_Cheatsheet.md](API_Cheatsheet.md)
+*   **构建标准 (Build Standard)**: [Build_Standard.md](Build_Standard.md)
 *   **项目配置与发布**: [Project_Configuration/Plugin_Metadata.md](Project_Configuration/Plugin_Metadata.md)
 
 ## 2. 插件类型参考 (Plugin Types)

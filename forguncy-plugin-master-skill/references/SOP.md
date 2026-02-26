@@ -4,7 +4,10 @@
 
 ## 阶段一：环境与初始化 (Setup)
 1. **环境检查**：安装 .NET SDK (6.0+) 及活字格设计器。
-2. **项目创建**：运行 `scripts/init_project.ps1` 启动构建器。
+2. **项目创建 (强制)**：
+   - **必须**运行 `scripts/init_project.ps1` 启动构建器。
+   - **严禁**手动创建项目结构或使用 `dotnet new`。
+   - **严禁**使用 `Start-Process` 直接调用 `ForguncyPluginCreator.exe`。
 3. **项目配置**：用户确认创建完成后，运行 `scripts/setup_project.ps1` 配置 Logo 和依赖。
 4. **产出**：获取包含 `.csproj` 和基础代码的项目结构。
 
@@ -37,8 +40,8 @@
    - **埋点**：带有 `[PluginName]` 前缀的日志记录。
 
 ## 阶段五：构建与维护 (Build & Maintenance)
-1. **构建**：直接执行 `dotnet build`。
-   - **注意**：仅需编译通过即可。
+1. **构建**：在项目根目录执行 `dotnet build`（无参数）。
+   - **注意**：默认生成 Debug 版本。
 2. **验证**：在设计器安装并测试功能，检查 F12 控制台日志。
 3. **代码维护 (Refactoring)**：
    - **API 迁移**：使用 `grep` 或 `Find` 定位旧接口（如 `IGenerateContext`），进行小步替换与验证。
@@ -54,5 +57,5 @@
      - 从 `README.md` 提取最新的功能描述。
    - **生成**：填充模板中的占位符（包括版本、作者、截图链接），确保文档符合葡萄城市场规范。
 2. **最终打包**：
-   - 执行 `dotnet build`。
-   - 交付物为 `bin/Release/net6.0/` 目录下的 zip 包。
+   - **执行**：运行 `dotnet build`（严禁添加 `-c Release`）。
+   - **交付**：取 `bin/Debug/net6.0/` 下的 zip 包。

@@ -15,34 +15,46 @@
 #>
 
 param(
-    [string]$ProjectName = "MyForguncyPlugin"
+    [string]$ProjectName = "MyForguncyPlugin",
+    [string]$BuilderPath = $null
 )
 
-# Define common paths for the builder
-$PossiblePaths = @(
-    "D:\Code\ForguncyPluginBuilder\forguncyPluginBuilder_V11.1\bin\ForguncyPluginCreator.exe",
-    "C:\Program Files\Forguncy Plugin Builder\ForguncyPluginCreator.exe",
-    "C:\Program Files (x86)\Forguncy Plugin Builder\ForguncyPluginCreator.exe",
-    "$env:LOCALAPPDATA\Forguncy Plugin Builder\ForguncyPluginCreator.exe",
-    "E:\forguncyPluginBuilder_V11.1\bin\ForguncyPluginCreator.exe"
-)
+if (-not [string]::IsNullOrEmpty($BuilderPath)) {
+    if (-not (Test-Path -Path $BuilderPath -PathType Leaf)) {
+        Write-Error "Error: The provided BuilderPath does not exist or is not a file: $BuilderPath"
+        exit 1
+    }
+    
+    $fileName = Split-Path -Path $BuilderPath -Leaf
+    if ($fileName -ne "ForguncyPluginCreator.exe") {
+        Write-Error "Error: The provided file is not 'ForguncyPluginCreator.exe'. Found: $fileName"
+        exit 1
+    }
+} else {
+    # Define common paths for the builder
+    $PossiblePaths = @(
+        "D:\Code\ForguncyPluginBuilder\forguncyPluginBuilder_V11.1\bin\ForguncyPluginCreator.exe",
+        "C:\Program Files\Forguncy Plugin Builder\ForguncyPluginCreator.exe",
+        "C:\Program Files (x86)\Forguncy Plugin Builder\ForguncyPluginCreator.exe",
+        "$env:LOCALAPPDATA\Forguncy Plugin Builder\ForguncyPluginCreator.exe",
+        "E:\forguncyPluginBuilder_V11.1\bin\ForguncyPluginCreator.exe"
+    )
 
-$BuilderPath = $null
-
-# Check paths
-foreach ($path in $PossiblePaths) {
-    if (Test-Path $path) {
-        $BuilderPath = $path
-        break
+    # Check paths
+    foreach ($path in $PossiblePaths) {
+        if (Test-Path $path) {
+            $BuilderPath = $path
+            break
+        }
     }
 }
 
 if ($null -eq $BuilderPath) {
     Write-Warning "Forguncy Plugin Builder not found in default paths."
     Write-Host "Checked paths:"
-    $PossiblePaths | ForEach-Object { Write-Host " - $_" }
-    Write-Host "`nPlease start the builder manually."
-    return
+    if ($PossiblePaths) { $PossiblePaths | ForEach-Object { Write-Host " - $_" } }
+    Write-Host "`nPlease install the builder or provide the path using -BuilderPath."
+    exit 1
 }
 
 Write-Host "Builder found: $BuilderPath"
