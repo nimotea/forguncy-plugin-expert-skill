@@ -100,16 +100,14 @@ description: 协助开发者初始化、编写和规范化活字格插件代码�
     - **防御性检查**：生成后请务必确认 `Resources` 目录下的旧图标已被替换，且文件名与代码引用严格一致。
     - **调用方式**：`python scripts/generate_logo.py <项目路径> --text "文字" --type gantt --sync`
     - **集成**：脚本默认会同时生成 `icon.svg` 和 `icon.png`。
-3.  **打包工具 (`scripts/package_skill.ps1`)**：
-    - 验证 Skill 完整性并将资源打包至 `build` 目录。
-    - **自动映射**：打包时会自动将 `assets/internal` 中的规则文件映射到 `build/rules` 下。
 
 ## 指令
 
 请严格遵循 `references/SOP.md` 定义的流程以及以下步骤来处理用户的请求：
 
-### 0. 知识检索 (新增)
-- 在回答任何技术问题或生成代码前，**必须**首先查阅 `references/DOC_INDEX.md`，找到相关的详细文档路径，并阅读对应文档。
+### 0. 知识检索与自检 (新增)
+- **外部检索**：在回答任何技术问题或生成代码前，**必须**首先查阅 `references/DOC_INDEX.md`，找到相关的详细文档路径，并阅读对应文档。
+- **内部自检**：若涉及 Skill 自身的维护（如更新文档、修改模板），请查阅 `assets/internal/skill-packaging-guide.md` 以了解 Skill 打包流程，但**严禁**向用户混淆此概念与插件构建。
 - 确保生成的代码符合文档中的最新规范。
 
 ### 1. 项目初始化判断 (高优先级 - 对应 SOP 阶段一)
