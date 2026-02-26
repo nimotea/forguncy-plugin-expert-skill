@@ -50,8 +50,8 @@ jobs:
 
           # 2. Clone the target repository
           # Using a temporary directory
-          git clone --depth 1 --branch $TARGET_BRANCH "https://x-access-token:$API_TOKEN_GITHUB@github.com/$TARGET_REPOSITORY.git" target_repo || \
-          git clone --depth 1 "https://x-access-token:$API_TOKEN_GITHUB@github.com/$TARGET_REPOSITORY.git" target_repo
+          git clone --depth 1 --branch $TARGET_BRANCH "https://oauth2:$API_TOKEN_GITHUB@github.com/$TARGET_REPOSITORY.git" target_repo || \
+          git clone --depth 1 "https://oauth2:$API_TOKEN_GITHUB@github.com/$TARGET_REPOSITORY.git" target_repo
 
           cd target_repo
           
