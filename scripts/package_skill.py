@@ -241,6 +241,21 @@ def package_skill(skill_input, output_dir=None, format='folder'):
             shutil.copy2(internal_rule_src, cursor_rules_dir / "skill-apply.mdc")
             print(f"  Generated: .cursor/rules/skill-apply.mdc")
             
+        # Copy scripts to output directory
+        scripts_src = repo_root / "scripts"
+        scripts_dst = output_path / "scripts"
+        if scripts_src.exists():
+            print(f"⚙️  Copying scripts from: {scripts_src}")
+            scripts_dst.mkdir(parents=True, exist_ok=True)
+            for file in os.listdir(scripts_src):
+                if file.endswith('.ps1') or file.endswith('.py'):
+                    # Skip package_skill related scripts to avoid confusion in distribution
+                    # Also skip setup_project.ps1 as requested
+                    if 'package_skill' in file or 'setup_project' in file:
+                        continue
+                    shutil.copy2(scripts_src / file, scripts_dst / file)
+                    print(f"  Copied script: {file}")
+
         print(f"\n✅ Successfully built skill folder to: {output_path}")
 
         if format == 'zip':

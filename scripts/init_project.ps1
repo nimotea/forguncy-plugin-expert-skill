@@ -70,7 +70,7 @@ try {
     
     Write-Host "Builder started." -ForegroundColor Green
     Write-Host "1. Please complete the project creation in the GUI."
-    Write-Host "2. After the project is created, run 'scripts\setup_project.ps1' to configure Logo and Dependencies." -ForegroundColor Cyan
+    Write-Host "2. After the project is created, configure Logo and Dependencies manually or via other scripts if needed." -ForegroundColor Cyan
 }
 catch {
     Write-Error "Failed to start builder: $_"
