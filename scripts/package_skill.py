@@ -27,7 +27,26 @@ except ImportError:
 def get_version(skill_path):
     """
     Read version from package.json in skill root, default to 1.0.0.
+    Priority:
+    1. Project root package.json (where npm version runs)
+    2. Skill directory package.json
     """
+    # Try reading from project root (2 levels up from scripts/)
+    repo_root = Path(__file__).parent.parent
+    root_package_json = repo_root / "package.json"
+    
+    if root_package_json.exists():
+        try:
+            with open(root_package_json, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                version = data.get("version")
+                if version:
+                    print(f"📌 Using version from project root: {version}")
+                    return version
+        except Exception as e:
+            print(f"⚠️ Warning: Could not read root package.json: {e}")
+
+    # Fallback to skill directory package.json
     package_json_file = Path(skill_path) / "package.json"
     if package_json_file.exists():
         try:
@@ -36,6 +55,7 @@ def get_version(skill_path):
                 return data.get("version", "1.0.0")
         except Exception as e:
             print(f"⚠️ Warning: Could not read package.json: {e}")
+            
     return "1.0.0"
 
 
