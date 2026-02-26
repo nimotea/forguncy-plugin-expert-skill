@@ -252,8 +252,8 @@ def package_skill(skill_input, output_dir=None, format='folder'):
             for file in os.listdir(scripts_src):
                 if file.endswith('.ps1') or file.endswith('.py'):
                     # Skip package_skill related scripts to avoid confusion in distribution
-                    # Also skip setup_project.ps1 as requested
-                    if 'package_skill' in file or 'setup_project' in file:
+                    # Also skip setup_project.ps1 and optimize_knowledge.py as requested
+                    if 'package_skill' in file or 'setup_project' in file or 'optimize_knowledge' in file:
                         continue
                     shutil.copy2(scripts_src / file, scripts_dst / file)
                     print(f"  Copied script: {file}")
