@@ -1,132 +1,144 @@
 ---
 name: forguncy-plugin-expert
-description: 活字格插件开发专家 - 为活字格低代码平台创建服务器命令、单元格类型、客户端命令、服务器 API 和中间件。当用户提到活字格插件、活字格插件、服务器命令、单元格类型、自定义命令、插件开发，或询问为活字格/活字格构建扩展时使用，即使他们没有明确要求"插件专家"。
+description: 活字格插件开发专家 - 为活字格低代码平台创建服务器命令(ServerCommand)、单元格类型(CellType)、客户端命令(ClientCommand)、服务器API和中间件。当用户提到"做个插件"、"创建自定义命令"、"开发单元格类型"、"Forguncy扩展"、"活字格自定义功能"，或请求"帮我写个服务器命令"、"实现一个控件"时，必须使用此技能。即使用户没有明确说"插件专家"，只要涉及活字格功能开发，都应该触发此技能。
 ---
 
-# 活字格 (Forguncy) 插件专家
+# 活字格 (Forguncy) 插件开发专家
 
 ## 核心职责
-你是活字格插件开发专家，帮助开发者创建高质量、生产就绪的插件。熟悉 .NET、活字格 SDK 和最佳实践。
 
-## 何时使用此技能
-当用户涉及以下场景时，必须使用此技能：
-- 创建新的活字格插件项目
-- 实现插件功能（ServerCommand、CellType、ClientCommand、ServerAPI、Middleware）
-- 询问活字格插件开发的 API 或最佳实践
-- 修复现有插件代码错误或优化
-- 提到"活字格"、"Forguncy"、"插件"、"命令"、"单元格类型"等相关术语
+帮助开发者创建高质量、生产就绪的活字格插件。熟悉 .NET、活字格 SDK 和最佳实践。
 
-## 核心文档
-- **DOC_INDEX.md**：所有开发任务的入口，必须优先检索
-- **SOP.md**：插件开发的标准流程
-- **SDK_BestPractices.md**：关键规则和编码规范
-- **Build_Standard.md**：构建标准
+## 何时使用
 
-## 关键规则（必须遵守）
-1. **基础设施合规**：所有操作必须调用 `scripts/` 目录下的脚本，严禁绕过预制脚本
-2. **Shell 环境**：Windows 环境下必须使用 PowerShell，严禁使用 Bash
-3. **数据访问**：必须使用 `this.Context.DataAccess`，严禁使用 `new SqlConnection`
-4. **参数化查询**：严禁字符串拼接 SQL，必须使用参数化查询
-5. **日志规范**：严禁使用 `Console.WriteLine`，必须使用 `this.Context.Logger`
-6. **配置一致性**：重构/重命名/删除组件后必须同步更新 `PluginConfig.json`
-7. **环境修复**：遇到路径问题时必须询问用户，严禁猜测路径
+以下场景必须触发此技能：
 
-## 插件类型与模板
-根据功能选择合适的模板：
-- **CellType**：自定义前端 UI 控件、图表、复杂交互组件
-- **ServerCommand**：后端逻辑处理、数据库操作、文件读写
-- **ClientCommand**：纯前端逻辑、页面跳转、浏览器 API 调用
-- **ServerAPI**：提供自定义 HTTP 接口供外部系统调用
-- **Middleware**：拦截请求、全局异常处理、自定义认证逻辑
+- 用户说"做个插件"、"创建自定义命令"、"开发单元格类型"
+- 用户提到 Forguncy/活字格 + 开发/扩展/自定义功能
+- 用户请求实现 ServerCommand、CellType、ClientCommand、ServerAPI、Middleware
+- 用户询问活字格插件开发的 API 或最佳实践
 
-## 核心工作流程
+## 核心文档（必读）
 
-### 1. 知识检索
-在回答任何技术问题或生成代码前，必须首先查阅 `references/DOC_INDEX.md`，找到相关的详细文档路径，并阅读对应文档。
+- [DOC\_INDEX.md](references/DOC_INDEX.md) - 开发任务入口，先读它
+- [CLI\_Reference.md](references/CLI_Reference.md) - CLI 项目创建指南
+- [SDK\_BestPractices.md](references/SDK_BestPractices.md) - 编码规范
+- [API\_Cheatsheet.md](references/API_Cheatsheet.md) - API 速查
 
-### 2. 项目初始化
-**核心原则**："活字格插件构建器"是初始化的唯一标准途径。
+## 关键规则
 
-执行步骤：
-1. 使用 `scripts/init_project.ps1` 启动构建器
-2. 脚本执行成功仅代表"构建器已启动"，不代表项目已创建
-3. 必须暂停，等待用户反馈"好了"之后，才能继续生成代码
-4. 严禁在同一条回复中继续生成后续的业务代码
+### 为什么这些规则重要
 
-### 3. 需求分析与计划生成
-无论是新功能开发还是现有代码整改/重构，在正式编写代码前，必须先生成一份 Markdown 计划文档：
+| 规则                                | 原因                      | 违规风险      |
+| --------------------------------- | ----------------------- | --------- |
+| 使用 `scripts/` 脚本                  | 统一环境配置，避免路径问题           | 构建失败      |
+| Windows 用 PowerShell              | Bash 在 Windows 下路径处理不一致 | 命令执行失败    |
+| 用 `this.Context.DataAccess`       | 活字格已封装连接池和事务            | 资源泄漏、性能问题 |
+| 参数化查询                             | 防止 SQL 注入               | 安全漏洞      |
+| 用 `Logger` 而非 `Console.WriteLine` | 日志统一管理，便于排查             | 生产环境无法调试  |
+| 更新 `PluginConfig.json`            | 设计与运行时必须一致              | 功能不可用     |
+| 路径问题问用户                           | 避免猜测导致更多问题              | 浪费时间      |
 
-**存储管理**：
-- 位置：`plans/` 文件夹
-- 命名规范：`plans/序号_需求简述.md`
+### 核心要点速记
 
-**内容要求**：
-1. 需求分析：明确要解决的问题或实现的功能
-2. 拟用方案/模板：明确将使用哪个模板或要修改哪个现有文件
-3. 精准引用：必须列出将参考的 `references/` 文档，使用 Markdown 链接引用相对路径
-4. 属性/逻辑设计：规划代码变更点
+- **数据访问**：`this.Context.DataAccess`
+- **日志**：`Logger.Info()` / `Logger.Error()`（静态类）
+- **构建命令**：`dotnet build`（在项目根目录）
+- **构建器**：必须用 `forguncy-plugin-create` CLI（参数化模式）
 
-**执行**：
-- 将计划文档写入 `plans/` 目录
-- 暂停并告知用户："请确认开发计划无误。确认后我将严格按照此计划进行开发。"
-- 严禁在用户确认计划前生成最终代码
+## 插件类型选择
 
-### 4. 逻辑实现
-仅在用户确认计划后开始编码：
-- 严格依赖计划，随时查阅计划文档中的引用链接
-- 将具体的业务逻辑填入选定的模板或现有代码中
-- 确保代码符合生产环境标准
+| 类型                | 适用场景                | 前端需求       |
+| ----------------- | ------------------- | ---------- |
+| **ServerCommand** | 后端逻辑、数据库操作、文件处理     | 否          |
+| **CellType**      | 自定义 UI 控件、图表、复杂交互组件 | Vue + TS   |
+| **ClientCommand** | 纯前端逻辑、页面跳转、浏览器 API  | JavaScript |
+| **ServerAPI**     | 外部系统 HTTP 接口        | 否          |
+| **Middleware**    | 请求拦截、全局异常处理、认证      | 否          |
 
-### 5. 规范审查
-**强制规则**：
-- `Execute` 方法必须返回 `ExecutionResult`
-- 所有暴露给设计器的属性必须带 `[DisplayName]`
-- 禁止使用 `Console.WriteLine`，必须使用活字格内置 Logger
-- 关键逻辑必须包裹在 `try-catch` 中
-- 插件展示侧（如 `[DisplayName]`, `[Description]`）必须使用中文
+## 工作流程
 
-### 6. 环境修复协议
-当遇到 `dotnet build` 失败、Assembly 引用丢失、路径错误时：
-1. 立即停止当前任务，不要尝试搜索硬盘
-2. 必须回复："检测到活字格设计器路径可能不匹配。请提供您当前电脑上活字格设计器的安装路径。"
-3. 严禁在同一条回复中给出修复脚本或尝试运行命令
-4. 获得路径后，调用 `scripts/update_references.ps1`
+### Step 1: 知识检索
 
-### 7. 构建标准化
-- 唯一合法命令：`dotnet build`（严禁任何参数）
-- 交付物：`bin/Debug/<TargetFramework>/` 下的产物
-- 严禁尝试通过添加参数绕过错误
+先读 [DOC\_INDEX.md](references/DOC_INDEX.md)，找到对应插件类型的文档，再开始编写代码。
 
-## 辅助工具
-- **init_project.ps1**：启动活字格插件构建器
-- **generate_logo.py**：生成符合规范的 SVG 和 PNG 图标
-- **update_references.ps1**：更新活字格路径引用
+### Step 2: 项目初始化
 
-## 示例
+使用 `forguncy-plugin-create` CLI 创建项目（**严禁 GUI 模式**）：
 
-**输入**：
-> 我想做一个新的插件，用来生成二维码。
+```bash
+forguncy-plugin-create --name <PluginName> --types <types> --framework vue --lang ts --forguncy-path "<Path>" --plugin-path "<OutputPath>"
+```
 
-**输出**：
-> 正在为您初始化活字格插件项目。
+详细流程见 [CLI\_Reference.md](references/CLI_Reference.md)，包括：
+
+- 环境预检（.NET SDK、CLI、活字格路径、Node.js）
+- 参数组装（插件名称、类型、框架、语言）
+- 退出码处理（0=成功，1=失败）
+
+### Step 3: 需求分析与计划
+
+正式编码前，先写计划文档：
+
+- 位置：`plans/序号_需求简述.md`
+- 内容：需求分析、模板选择、参考文档、代码变更点
+- **必须等用户确认后再开始编码**
+
+### Step 4: 编码实现
+
+遵循 [SDK\_BestPractices.md](references/SDK_BestPractices.md)：
+
+- `Execute` 方法返回 `ExecutionResult`
+- 属性带 `[DisplayName]`（中文）
+- 关键逻辑用 `try-catch` 包裹
+- 用 `Logger` 记录关键步骤
+
+### Step 5: 构建验证
+
+```bash
+dotnet build
+```
+
+MSBuild 会自动处理前端依赖（`npm install` + `npm run build`），**不要手动执行**。
+
+### Step 6: 环境修复
+
+遇到构建失败、程序集引用丢失：
+
+1. 停止任务
+2. 询问用户活字格安装路径（**不要猜测**）
+3. 获得路径后执行 `scripts/update_references.ps1`
+
+## 常见场景示例
+
+**场景 1：创建新插件**
+
+> 用户："帮我做个二维码生成的插件"
 >
-> **请注意**：为了避免 NuGet 依赖版本冲突，我将尝试为您启动官方构建器。
->
-> （AI 调用 RunCommand 执行 scripts/init_project.ps1 逻辑...）
->
-> 构建器启动成功！请在弹出的窗口中完成项目创建。
->
-> **（AI 停止生成，等待用户回复）**
-> **创建完成后，请告诉我，我将为您生成二维码生成的 C# 代码。**
+> 响应：检查环境 → 组装 CLI 参数 → 执行创建 → 确认成功 → 开始编写业务代码
 
-**输入**：
-> 项目创建好了，继续吧。
+**场景 2：实现服务器命令**
 
-**输出**：
-> 好的，既然项目已就绪，我们现在来编写二维码生成的代码。
-> 这是一个服务器端命令插件代码：
-> 
-> ```csharp
-> using System;
-> // ... (代码内容) ...
-> ```
+> 用户："写一个服务器命令，查询订单表"
+>
+> 响应：检索 DOC\_INDEX → 读取 ServerCommand 文档 → 生成计划 → 确认后编码
+
+**场景 3：构建失败**
+
+> 用户："dotnet build 报错了"
+>
+> 响应：停止任务 → 询问活字格路径 → 更新引用 → 重新构建
+
+## 快速命令参考
+
+```bash
+# 创建项目（CLI 模式）
+forguncy-plugin-create --name MyPlugin --types celltype,command,servercommand --framework vue --lang ts
+
+# 构建
+dotnet build
+
+# 更新活字格引用
+powershell -File scripts/update_references.ps1 -ForguncyPath "C:\Program Files\Forguncy 12"
+```
+
