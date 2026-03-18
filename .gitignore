@@ -5,3 +5,6 @@ __pycache__/
 *.skill
 
 build/
+
+# Forguncy path cache
+.forguncy-path-cache.json
